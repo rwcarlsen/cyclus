@@ -1,13 +1,11 @@
 // Facilitymodel_tests.h
 #include <gtest/gtest.h>
 
-#include "context.h"
-#include "event_manager.h"
 #include "facility_model.h"
 #include "suffix.h"
+#include "test_context.h"
 #include "test_inst.h"
 #include "test_market.h"
-#include "timer.h"
 
 #if GTEST_HAS_PARAM_TEST
 
@@ -18,25 +16,22 @@ using ::testing::Values;
 // Inside the test body, fixture constructor, SetUp(), and TearDown() we
 // can refer to the test parameter by GetParam().  In this case, the test
 // parameter is a pointer to a concrete FacilityModel instance 
-typedef cyclus::FacilityModel* FacilityModelConstructor();
+typedef cyclus::FacilityModel* FacilityModelConstructor(cyclus::Context* ctx);
 
 class FacilityModelTests : public TestWithParam<FacilityModelConstructor*> {
  public:
-  virtual void SetUp() {
-    ctx = new cyclus::Context(&t, &em);
-    
-    facility_model_ = (*GetParam())();
-    test_inst_ = new TestInst(ctx);
+  virtual void SetUp() {    
+    facility_model_ = (*GetParam())(tc_.get());
+    test_inst_ = new TestInst(tc_.get());
     facility_model_->SetParent(test_inst_);
-    test_out_market_ = new TestMarket(ctx, "out-commod");
-    test_in_market_ = new TestMarket(ctx, "in-commod");
+    test_out_market_ = new TestMarket(tc_.get(), "out-commod");
+    test_in_market_ = new TestMarket(tc_.get(), "in-commod");
   }
   virtual void TearDown(){ 
     delete facility_model_;
     delete test_inst_;
     delete test_out_market_;
     delete test_in_market_;
-    delete ctx;
   }
     
  protected:
@@ -44,9 +39,7 @@ class FacilityModelTests : public TestWithParam<FacilityModelConstructor*> {
   TestMarket* test_out_market_;
   TestMarket* test_in_market_;
   TestInst* test_inst_;
-  cyclus::Context* ctx;
-  cyclus::Timer t;
-  cyclus::EventManager em;
+  cyclus::TestContext tc_;
 };
 
 #else
