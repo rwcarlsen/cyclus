@@ -147,3 +147,9 @@ add_custom_command(TARGET ${tgt}
 ##############################################################################################
 #################################### end cyclus testing ######################################
 ##############################################################################################
+
+# Build Module test driver
+ADD_EXECUTABLE( moduletest moduletest.cc)
+TARGET_LINK_LIBRARIES( moduletest dl ${LIBS} cycluscore gtest)
+INSTALL(TARGETS moduletest RUNTIME DESTINATION bin COMPONENT testing)
+
