@@ -20,5 +20,11 @@ INSTALL(
   )
 
 ##############################################################################################
-###################################### end cyclus app ########################################
+###################################### module tester #########################################
 ##############################################################################################
+
+# Build Module inquirer
+ADD_EXECUTABLE( moduletest moduletest.cc)
+TARGET_LINK_LIBRARIES( moduletest dl ${LIBS} cycluscore)
+INSTALL(TARGETS moduletest RUNTIME DESTINATION bin COMPONENT testing)
+
