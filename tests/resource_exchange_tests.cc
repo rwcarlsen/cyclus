@@ -44,7 +44,6 @@ class Requester: public MockFacility {
  public:
   Requester(Context* ctx, int i = 1)
       : MockFacility(ctx),
-        Model(ctx),
         i_(i),
         req_ctr_(0),
         pref_ctr_(0)
@@ -91,7 +90,6 @@ class Bidder: public MockFacility {
  public:
   Bidder(Context* ctx, std::string commod)
       : MockFacility(ctx),
-        Model(ctx),
         commod_(commod),
         bid_ctr_(0)
   {};

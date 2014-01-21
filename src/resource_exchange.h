@@ -123,10 +123,10 @@ class ResourceExchange {
   /// system
   void AdjustPrefs_(Trader* t) {
     typename PrefMap<T>::type& prefs = ex_ctx_.trader_prefs[t];
-    Model* m = t;
+    Model* m = t->supervisor();
     while (m != NULL) {
       AdjustPrefs(m, prefs);
-      m = m->parent();
+      m = t->supervisor()->parent();
     }    
   };
   
