@@ -1,4 +1,3 @@
-
 #ifndef CYCLUS_RESOURCE_EXCHANGE_H_
 #define CYCLUS_RESOURCE_EXCHANGE_H_
 
@@ -126,7 +125,7 @@ class ResourceExchange {
     Model* m = t->supervisor();
     while (m != NULL) {
       AdjustPrefs(m, prefs);
-      m = t->supervisor()->parent();
+      m = m->parent();
     }    
   };
   
