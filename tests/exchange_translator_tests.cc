@@ -122,10 +122,10 @@ TEST(ExXlateTests, XlateCapacities) {
   Arc arc(rnode, bnode);
 
   double rarr[] = {(c2->convert(mat) / qty), (c1->convert(mat) / qty)};
-  std::vector<double> rexp(rarr, rarr +sizeof(rarr) / sizeof(rarr[0]));
+  std::vector<double, boost::pool_allocator<double> > rexp(rarr, rarr +sizeof(rarr) / sizeof(rarr[0]));
 
   double barr[] = {(c1->convert(mat) / qty)};
-  std::vector<double> bexp(barr, barr +sizeof(barr) / sizeof(barr[0]));
+  std::vector<double, boost::pool_allocator<double> > bexp(barr, barr +sizeof(barr) / sizeof(barr[0]));
 
   ExchangeTranslationContext<Material> ctx;
   TranslateCapacities<Material>(mat, rconstrs, rnode, arc, ctx);
@@ -280,11 +280,11 @@ TEST(ExXlateTests, XlateArc) {
   EXPECT_FALSE(a.exclusive());
 
   double barr[] = {(c2->convert(mat) / qty), (c1->convert(mat) / qty)};
-  std::vector<double> bexp(barr, barr +sizeof(barr) / sizeof(barr[0]));
+  std::vector<double, boost::pool_allocator<double> > bexp(barr, barr +sizeof(barr) / sizeof(barr[0]));
   TestVecEq(bexp, a.vnode()->unit_capacities[a]);
 
   double rarr[] = {(c1->convert(mat) / qty)};
-  std::vector<double> rexp(rarr, rarr +sizeof(rarr) / sizeof(rarr[0]));
+  std::vector<double, boost::pool_allocator<double> > rexp(rarr, rarr +sizeof(rarr) / sizeof(rarr[0]));
   TestVecEq(rexp, a.unode()->unit_capacities[a]);
 }
 

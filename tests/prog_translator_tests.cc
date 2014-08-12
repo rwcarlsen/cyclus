@@ -84,25 +84,25 @@ TEST(ProgTranslatorTests, translation) {
   Arc x3(a1, d0);
   Arc x4(b1, d1);
 
-  a0->unit_capacities[x0] = std::vector<double>(
+  a0->unit_capacities[x0] = std::vector<double, boost::pool_allocator<double> >(
       ucaps_a_0, ucaps_a_0 + sizeof(ucaps_a_0) / sizeof(ucaps_a_0[0]) );
-  a1->unit_capacities[x3] = std::vector<double>(
+  a1->unit_capacities[x3] = std::vector<double, boost::pool_allocator<double> >(
       ucaps_a_3, ucaps_a_3 + sizeof(ucaps_a_3) / sizeof(ucaps_a_3[0]) );
-  b0->unit_capacities[x1] = std::vector<double>(
+  b0->unit_capacities[x1] = std::vector<double, boost::pool_allocator<double> >(
       ucaps_b_1, ucaps_b_1 + sizeof(ucaps_b_1) / sizeof(ucaps_b_1[0]) );
-  b1->unit_capacities[x2] = std::vector<double>(
+  b1->unit_capacities[x2] = std::vector<double, boost::pool_allocator<double> >(
       ucaps_b_2, ucaps_b_2 + sizeof(ucaps_b_2) / sizeof(ucaps_b_2[0]) );
-  b1->unit_capacities[x4] = std::vector<double>(
+  b1->unit_capacities[x4] = std::vector<double, boost::pool_allocator<double> >(
       ucaps_b_4, ucaps_b_4 + sizeof(ucaps_b_4) / sizeof(ucaps_b_4[0]) );
-  c0->unit_capacities[x0] = std::vector<double>(
+  c0->unit_capacities[x0] = std::vector<double, boost::pool_allocator<double> >(
       ucaps_c_0, ucaps_c_0 + sizeof(ucaps_c_0) / sizeof(ucaps_c_0[0]) );
-  c1->unit_capacities[x1] = std::vector<double>(
+  c1->unit_capacities[x1] = std::vector<double, boost::pool_allocator<double> >(
       ucaps_c_1, ucaps_c_1 + sizeof(ucaps_c_1) / sizeof(ucaps_c_1[0]) );
-  c2->unit_capacities[x2] = std::vector<double>(
+  c2->unit_capacities[x2] = std::vector<double, boost::pool_allocator<double> >(
       ucaps_c_2, ucaps_c_2 + sizeof(ucaps_c_2) / sizeof(ucaps_c_2[0]) );
-  d0->unit_capacities[x3] = std::vector<double>(
+  d0->unit_capacities[x3] = std::vector<double, boost::pool_allocator<double> >(
       ucaps_d_3, ucaps_d_3 + sizeof(ucaps_d_3) / sizeof(ucaps_d_3[0]) );
-  d1->unit_capacities[x4] = std::vector<double>(
+  d1->unit_capacities[x4] = std::vector<double, boost::pool_allocator<double> >(
       ucaps_d_4, ucaps_d_4 + sizeof(ucaps_d_4) / sizeof(ucaps_d_4[0]) );
 
   a0->prefs[x0] = prefs[0];

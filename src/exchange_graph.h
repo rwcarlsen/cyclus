@@ -9,6 +9,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
+#include <boost/pool/pool_alloc.hpp>
 
 namespace cyclus {
 
@@ -39,7 +40,7 @@ struct ExchangeNode {
   /// @brief unit values associated with this ExchangeNode corresponding to
   /// capacties of its parent ExchangeNodeGroup. This information corresponds to
   /// the resource object from which this ExchangeNode was translated.
-  std::map<Arc, std::vector<double> > unit_capacities;
+  std::map<Arc, std::vector<double, boost::pool_allocator<double> > > unit_capacities;
 
   /// @brief preference values for arcs
   std::map<Arc, double> prefs;

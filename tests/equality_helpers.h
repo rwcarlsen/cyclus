@@ -7,7 +7,7 @@
 #include "request_portfolio.h"
 
 template<class T>
-inline void TestVecEq(const std::vector<T>& lhs, const std::vector<T>& rhs) {
+inline void TestVecEq(const T& lhs, const T& rhs) {
   ASSERT_EQ(lhs.size(), rhs.size()) << "Vectors not the same size";
   for (int i = 0; i < lhs.size(); i++) {
     EXPECT_EQ(lhs[i], rhs[i]) << "Vectors differ at index " << i;
@@ -15,8 +15,8 @@ inline void TestVecEq(const std::vector<T>& lhs, const std::vector<T>& rhs) {
 }
 
 template<>
-inline void TestVecEq(const std::vector<double>& lhs,
-                      const std::vector<double>& rhs) {
+inline void TestVecEq(const std::vector<double, boost::pool_allocator<double> >& lhs,
+                      const std::vector<double, boost::pool_allocator<double> >& rhs) {
   ASSERT_EQ(lhs.size(), rhs.size()) << "Vectors not the same size";
   for (int i = 0; i < lhs.size(); i++) {
     EXPECT_DOUBLE_EQ(lhs[i], rhs[i]) << "Vectors differ at index " << i;

@@ -4,6 +4,7 @@
 #include <cassert>
 #include <functional>
 #include <vector>
+#include <boost/pool/pool_alloc.hpp>
 
 #include "cyc_limits.h"
 #include "error.h"
@@ -85,7 +86,7 @@ double GreedySolver::Capacity(ExchangeNode::Ptr n, const Arc& a, bool min_cap,
     return n->qty - curr_qty;
   }
 
-  std::vector<double>& unit_caps = n->unit_capacities[a];
+  std::vector<double, boost::pool_allocator<double> >& unit_caps = n->unit_capacities[a];
   const std::vector<double>& group_caps = grp_caps_[n->group];
   std::vector<double> caps;
   double grp_cap, u_cap, cap;
@@ -198,7 +199,7 @@ void GreedySolver::UpdateCapacity(ExchangeNode::Ptr n, const Arc& a,
   using cyclus::IsNegative;
   using cyclus::ValueError;
 
-  std::vector<double>& unit_caps = n->unit_capacities[a];
+  std::vector<double, boost::pool_allocator<double> >& unit_caps = n->unit_capacities[a];
   std::vector<double>& caps = grp_caps_[n->group];
   assert(unit_caps.size() == caps.size());
   for (int i = 0; i < caps.size(); i++) {

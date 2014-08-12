@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include <boost/pool/pool_alloc.hpp>
 
 #include "agent.h"
 #include "error.h"
@@ -33,6 +34,7 @@ void Timer::RunSim() {
     DoBuild();
     DoTick();
     DoResEx(&matl_manager, &genrsrc_manager);
+    boost::singleton_pool<boost::pool_allocator_tag, sizeof(double)>::release_memory();
     DoTock();
     DoDecom();
 

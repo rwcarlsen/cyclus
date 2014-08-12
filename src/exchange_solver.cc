@@ -24,10 +24,10 @@ double ExchangeSolver::PseudoCost(double cost_add) {
     std::vector<ExchangeNode::Ptr>& nodes = (*sg_it)->nodes();
     for (n_it = nodes.begin(); n_it != nodes.end(); ++n_it) {
       // update min_unit_cap
-      std::map<Arc, std::vector<double> >::iterator c_it;
-      std::map<Arc, std::vector<double> >& caps = (*n_it)->unit_capacities;
+      std::map<Arc, std::vector<double, boost::pool_allocator<double> > >::iterator c_it;
+      std::map<Arc, std::vector<double, boost::pool_allocator<double> > >& caps = (*n_it)->unit_capacities;
       for (c_it = caps.begin(); c_it != caps.end(); ++c_it) {
-        std::vector<double>& ucaps = c_it->second; 
+        std::vector<double, boost::pool_allocator<double> >& ucaps = c_it->second; 
         if (!ucaps.empty()) {
           min_cap = *std::min_element(ucaps.begin(), ucaps.end());
           if (min_cap < min_unit_cap)
@@ -43,10 +43,10 @@ double ExchangeSolver::PseudoCost(double cost_add) {
     std::vector<ExchangeNode::Ptr>& nodes = (*rg_it)->nodes();
     for (n_it = nodes.begin(); n_it != nodes.end(); ++n_it) {
       // update min_unit_cap
-      std::map<Arc, std::vector<double> >::iterator c_it;
-      std::map<Arc, std::vector<double> >& caps = (*n_it)->unit_capacities;
+      std::map<Arc, std::vector<double, boost::pool_allocator<double> > >::iterator c_it;
+      std::map<Arc, std::vector<double, boost::pool_allocator<double> > >& caps = (*n_it)->unit_capacities;
       for (c_it = caps.begin(); c_it != caps.end(); ++c_it) {
-        std::vector<double>& ucaps = c_it->second; 
+        std::vector<double, boost::pool_allocator<double> >& ucaps = c_it->second; 
         if (!ucaps.empty()) {
           min_cap = *std::min_element(ucaps.begin(), ucaps.end());
           if (min_cap < min_unit_cap)

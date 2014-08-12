@@ -119,13 +119,13 @@ void ProgTranslator::XlateGrp_(ExchangeNodeGroup* grp, bool request) {
 
   std::vector<ExchangeNode::Ptr>& nodes = grp->nodes();
   for (int i = 0; i != nodes.size(); i++) {
-    std::map<Arc, std::vector<double> >& ucap_map = nodes[i]->unit_capacities;
-    std::map<Arc, std::vector<double> >::iterator cap_it;
+    std::map<Arc, std::vector<double, boost::pool_allocator<double> > >& ucap_map = nodes[i]->unit_capacities;
+    std::map<Arc, std::vector<double, boost::pool_allocator<double> > >::iterator cap_it;
 
     // add each arc
     for (cap_it = ucap_map.begin(); cap_it != ucap_map.end(); ++cap_it) {
       const Arc& a = cap_it->first;
-      std::vector<double>& ucaps = cap_it->second;
+      std::vector<double, boost::pool_allocator<double> >& ucaps = cap_it->second;
       int arc_id = g_->arc_ids()[a];
 
       // add each unit capacity coefficient
