@@ -119,7 +119,7 @@ TEST(ExXlateTests, XlateCapacities) {
 
   ExchangeNode::Ptr rnode(new ExchangeNode());
   ExchangeNode::Ptr bnode(new ExchangeNode());
-  Arc arc(rnode, bnode);
+  Arc* arc = Arc::Make(1, rnode, bnode);
 
   double rarr[] = {(c2->convert(mat) / qty), (c1->convert(mat) / qty)};
   std::vector<double> rexp(rarr, rarr +sizeof(rarr) / sizeof(rarr[0]));
@@ -128,11 +128,11 @@ TEST(ExXlateTests, XlateCapacities) {
   std::vector<double> bexp(barr, barr +sizeof(barr) / sizeof(barr[0]));
 
   ExchangeTranslationContext<Material> ctx;
-  TranslateCapacities<Material>(mat, rconstrs, rnode, &arc, ctx);
-  TestVecEq(rexp, rnode->unit_capacities[&arc]);
+  TranslateCapacities<Material>(mat, rconstrs, rnode, arc, ctx);
+  TestVecEq(rexp, rnode->unit_capacities[arc]);
 
-  TranslateCapacities<Material>(mat, bconstrs, bnode, &arc, ctx);
-  TestVecEq(bexp, bnode->unit_capacities[&arc]);
+  TranslateCapacities<Material>(mat, bconstrs, bnode, arc, ctx);
+  TestVecEq(bexp, bnode->unit_capacities[arc]);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -421,8 +421,8 @@ TEST(ExXlateTests, BackXlate) {
   AddBid(xlator.translation_ctx(), vb, v);
   AddBid(xlator.translation_ctx(), yb, y);
 
-  Arc a(u, v);
-  Arc b(x, y);
+  Arc* a = Arc::Make(1, u, v);
+  Arc* b = Arc::Make(2, x, y);
 
   double qty = 2.5;  // some magic numbers
   double aqty = qty * 0.1;
@@ -434,8 +434,8 @@ TEST(ExXlateTests, BackXlate) {
   Trade<Material> tarr[] = {aexp, bexp};
   std::vector< Trade<Material> > exp(tarr, tarr + sizeof(tarr) / sizeof(tarr[0]));
 
-  Match amatch(std::make_pair(&a, aqty));
-  Match bmatch(std::make_pair(&b, bqty));
+  Match amatch(std::make_pair(a, aqty));
+  Match bmatch(std::make_pair(b, bqty));
 
   Match marr[] = {amatch, bmatch};
   std::vector<Match> matches(marr, marr + sizeof(marr) / sizeof(marr[0]));

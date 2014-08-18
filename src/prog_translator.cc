@@ -95,7 +95,7 @@ void ProgTranslator::Populate() {
     for (int i = 0; i != arcs.size(); i++) {
       const Arc* a = arcs[i];
       if (a->exclusive()) {
-        iface_->setInteger(g_->arc_ids()[a]);
+        iface_->setInteger(a->id());
       }
     }
   }
@@ -126,7 +126,7 @@ void ProgTranslator::XlateGrp_(ExchangeNodeGroup* grp, bool request) {
     for (cap_it = ucap_map.begin(); cap_it != ucap_map.end(); ++cap_it) {
       const Arc* a = cap_it->first;
       std::vector<double>& ucaps = cap_it->second;
-      int arc_id = g_->arc_ids()[a];
+      int arc_id = a->id();
 
       // add each unit capacity coefficient
       for (int j = 0; j != ucaps.size(); j++) {
@@ -176,7 +176,7 @@ void ProgTranslator::XlateGrp_(ExchangeNodeGroup* grp, bool request) {
       for (int j = 0; j != nodes.size(); j++) {
         std::vector<const Arc*>& arcs = g_->node_arc_map()[nodes[j]];
         for (int k = 0; k != arcs.size(); k++) {
-          excl_row.insert(g_->arc_ids()[arcs[k]], 1.0);
+          excl_row.insert(arcs[k]->id(), 1.0);
         }
       }
       if (excl_row.getNumElements() > 0) {

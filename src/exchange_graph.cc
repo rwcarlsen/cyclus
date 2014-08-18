@@ -49,14 +49,8 @@ bool operator==(const ExchangeNode& lhs, const ExchangeNode& rhs) {
 int Arc::index_ = 0;
 std::vector<Arc*> Arc::cache_;
 
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-Arc::Arc(boost::shared_ptr<ExchangeNode> unode,
-         boost::shared_ptr<ExchangeNode> vnode) {
-  init(unode, vnode);
-}
-
-Arc* Arc::Make(boost::shared_ptr<ExchangeNode> unode,
-          boost::shared_ptr<ExchangeNode> vnode) {
+Arc* Arc::Make(int id, boost::shared_ptr<ExchangeNode> unode,
+               boost::shared_ptr<ExchangeNode> vnode) {
   if (cache_.size() == 0) {
     index_ = 0;
     for (int i = 0; i < 100; i++) {
@@ -69,11 +63,12 @@ Arc* Arc::Make(boost::shared_ptr<ExchangeNode> unode,
     }
   }
 
-  return cache_[index_++]->init(unode, vnode);
+  return cache_[index_++]->init(id, unode, vnode);
 }
 
-Arc* Arc::init(boost::shared_ptr<ExchangeNode> unode,
-           boost::shared_ptr<ExchangeNode> vnode) {
+Arc* Arc::init(int id, boost::shared_ptr<ExchangeNode> unode,
+               boost::shared_ptr<ExchangeNode> vnode) {
+  id_ = id;
   unode_ = unode;
   vnode_ = vnode;
   exclusive_ = unode->exclusive || vnode->exclusive;
@@ -95,10 +90,11 @@ Arc* Arc::init(boost::shared_ptr<ExchangeNode> unode,
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Arc::Arc(const Arc& other)
-    : unode_(other.unode()),
-      vnode_(other.vnode()),
-      exclusive_(other.exclusive()),
-      excl_val_(other.excl_val()) {}
+    : unode_(other.unode_),
+      vnode_(other.vnode_),
+      exclusive_(other.exclusive_),
+      excl_val_(other.excl_val_),
+      id_(other.id_){}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 void ExchangeNodeGroup::AddExchangeNode(ExchangeNode::Ptr node) {
@@ -125,7 +121,7 @@ void RequestGroup::AddExchangeNode(ExchangeNode::Ptr node) {
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-ExchangeGraph::ExchangeGraph() : next_arc_id_(0) { }
+ExchangeGraph::ExchangeGraph() { }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 void ExchangeGraph::AddRequestGroup(RequestGroup::Ptr prs) {
@@ -140,9 +136,7 @@ void ExchangeGraph::AddSupplyGroup(ExchangeNodeGroup::Ptr pss) {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 void ExchangeGraph::AddArc(const Arc* a) {
   arcs_.push_back(a);
-  int id = next_arc_id_++;
-  arc_ids_.insert(std::pair<const Arc*, int>(a, id));
-  arc_by_id_.insert(std::pair<int, const Arc*>(id, a));
+  arc_by_id_.insert(std::pair<int, const Arc*>(a->id(), a));
   node_arc_map_[a->unode()].push_back(a);
   node_arc_map_[a->vnode()].push_back(a);
 }

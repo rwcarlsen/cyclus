@@ -17,10 +17,13 @@ namespace cyclus {
 template <class T>
 struct ExchangeTranslationContext {
  public:
+  ExchangeTranslationContext() : nextarcid(0) {};
+
   std::map<Request<T>*, ExchangeNode::Ptr> request_to_node;
   std::map<ExchangeNode::Ptr, Request<T>*> node_to_request;
   std::map<Bid<T>*, ExchangeNode::Ptr> bid_to_node;
   std::map<ExchangeNode::Ptr, Bid<T>*> node_to_bid;
+  int nextarcid;
 };
 
 }  // namespace cyclus

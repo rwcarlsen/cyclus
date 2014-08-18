@@ -222,13 +222,13 @@ ExchangeNodeGroup::Ptr TranslateBidPortfolio(
 /// @brief translates an arc given a bid and subsequent data, and also
 /// updates the unit capacities for the associated nodes on the arc
 template <class T>
-Arc* TranslateArc(const ExchangeTranslationContext<T>& translation_ctx,
+Arc* TranslateArc(ExchangeTranslationContext<T>& translation_ctx,
                  Bid<T>* bid) {
   Request<T>* req = bid->request();
 
   ExchangeNode::Ptr unode = translation_ctx.request_to_node.at(req);
   ExchangeNode::Ptr vnode = translation_ctx.bid_to_node.at(bid);
-  Arc* arc = Arc::Make(unode, vnode);
+  Arc* arc = Arc::Make(translation_ctx.nextarcid++, unode, vnode);
 
   typename T::Ptr offer = bid->offer();
   typename BidPortfolio<T>::Ptr bp = bid->portfolio();

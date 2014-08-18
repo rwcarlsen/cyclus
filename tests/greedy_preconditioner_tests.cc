@@ -17,9 +17,9 @@ TEST(ConditionerTests, AvgPref) {
   ExchangeNode::Ptr u2(new ExchangeNode());
   ExchangeNode::Ptr v(new ExchangeNode());
 
-  Arc a(u1, v);
+  Arc* a = Arc::Make(1, u1, v);
 
-  u1->prefs[&a] = 1;
+  u1->prefs[a] = 1;
 
   EXPECT_TRUE(AvgPref(u1) > AvgPref(u2));
 }
@@ -62,23 +62,23 @@ TEST(ConditionerTests, Conditioning) {
   s->AddExchangeNode(spam);
   g.AddSupplyGroup(s);
 
-  Arc n11e(n11, eggs);
-  Arc n12s(n12, spam);
-  Arc n13s(n13, spam);
-  Arc n21e(n21, eggs);
-  Arc n22s(n22, spam);
+  Arc* n11e = Arc::Make(1, n11, eggs);
+  Arc* n12s = Arc::Make(2, n12, spam);
+  Arc* n13s = Arc::Make(3, n13, spam);
+  Arc* n21e = Arc::Make(4, n21, eggs);
+  Arc* n22s = Arc::Make(5, n22, spam);
 
-  g.AddArc(&n11e);
-  g.AddArc(&n12s);
-  g.AddArc(&n13s);
-  g.AddArc(&n21e);
-  g.AddArc(&n22s);
+  g.AddArc(n11e);
+  g.AddArc(n12s);
+  g.AddArc(n13s);
+  g.AddArc(n21e);
+  g.AddArc(n22s);
 
-  n11->prefs[&n11e] = n1epref;
-  n12->prefs[&n12s] = n1spref;
-  n13->prefs[&n13s] = n1spref;
-  n21->prefs[&n21e] = n2epref;
-  n22->prefs[&n22s] = n2epref;
+  n11->prefs[n11e] = n1epref;
+  n12->prefs[n12s] = n1spref;
+  n13->prefs[n13s] = n1spref;
+  n21->prefs[n21e] = n2epref;
+  n22->prefs[n22s] = n2epref;
 
   // initial state
   EXPECT_EQ(g.request_groups().at(0), g1);

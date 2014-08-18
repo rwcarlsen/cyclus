@@ -70,16 +70,14 @@ class Arc {
   /// map values
   Arc() {}
 
-  Arc(boost::shared_ptr<ExchangeNode> unode,
-      boost::shared_ptr<ExchangeNode> vnode);
-
   Arc(const Arc& other);
 
   inline Arc& operator=(const Arc& other) {
-    unode_ = other.unode();
-    vnode_ = other.vnode();
-    exclusive_ = other.exclusive();
-    excl_val_ = other.excl_val();
+    unode_ = other.unode_;
+    vnode_ = other.vnode_;
+    id_ = other.id_;
+    exclusive_ = other.exclusive_;
+    excl_val_ = other.excl_val_;
     return *this;
   }
 
@@ -89,15 +87,18 @@ class Arc {
   }
 
   inline bool operator==(const Arc& rhs) const {
-    return unode() == rhs.unode() && vnode() == rhs.vnode();
+    return unode_.lock() == rhs.unode_.lock() && vnode_.lock() == rhs.vnode_.lock();
   }
+
+  inline int id() const {return id_;};
 
   inline boost::shared_ptr<ExchangeNode> unode() const { return unode_.lock(); }
   inline boost::shared_ptr<ExchangeNode> vnode() const { return vnode_.lock(); }
   inline bool exclusive() const { return exclusive_; }
   inline double excl_val() const { return excl_val_; }
 
-  static Arc* Make(boost::shared_ptr<ExchangeNode> unode,
+  static Arc* Make(int id,
+                   boost::shared_ptr<ExchangeNode> unode,
                    boost::shared_ptr<ExchangeNode> vnode);
 
   static void ReleaseCache() { index_ = 0;};
@@ -106,9 +107,10 @@ class Arc {
   static std::vector<Arc*> cache_;
   static int index_;
 
-  Arc* init(boost::shared_ptr<ExchangeNode> unode,
+  Arc* init(int id, boost::shared_ptr<ExchangeNode> unode,
             boost::shared_ptr<ExchangeNode> vnode);
 
+  int id_;
   boost::weak_ptr<ExchangeNode> unode_;
   boost::weak_ptr<ExchangeNode> vnode_;
   bool exclusive_;
@@ -253,9 +255,6 @@ class ExchangeGraph {
   inline const std::vector<const Arc*>& arcs() const { return arcs_; }
   inline std::vector<const Arc*>& arcs() { return arcs_; }
 
-  inline const std::map<const Arc*, int>& arc_ids() const { return arc_ids_; }
-  inline std::map<const Arc*, int>& arc_ids() { return arc_ids_; }
-
   inline const std::map<int, const Arc*>& arc_by_id() const { return arc_by_id_; }
   inline std::map<int, const Arc*>& arc_by_id() { return arc_by_id_; }
   
@@ -265,9 +264,7 @@ class ExchangeGraph {
   std::map<ExchangeNode::Ptr, std::vector<const Arc*> > node_arc_map_;
   std::vector<Match> matches_;
   std::vector<const Arc*> arcs_;
-  std::map<const Arc*, int> arc_ids_;
   std::map<int, const Arc*> arc_by_id_;
-  int next_arc_id_;
 };
 
 }  // namespace cyclus
