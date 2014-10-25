@@ -11,7 +11,7 @@
 
 namespace cyclus {
 
-std::string BuildFlatMasterSchema(std::string schema_path, std::string infile) {
+std::string BuildFlatMasterSchema(std::string schema_path, std::string data) {
   Timer ti;
   Recorder rec;
   Context ctx(&ti, &rec);
@@ -20,7 +20,7 @@ std::string BuildFlatMasterSchema(std::string schema_path, std::string infile) {
   LoadStringstreamFromFile(schema, schema_path);
   std::string master = schema.str();
 
-  std::vector<AgentSpec> specs = ParseSpecs(infile);
+  std::vector<AgentSpec> specs = ParseSpecs(data);
   std::string subschemas;
   for (int i = 0; i < specs.size(); ++i) {
     Agent* m = DynamicModule::Make(&ctx, specs[i]);
@@ -41,7 +41,7 @@ std::string BuildFlatMasterSchema(std::string schema_path, std::string infile) {
 }
 
 std::string XMLFlatLoader::master_schema() {
-  return BuildFlatMasterSchema(schema_path_, file_);
+  return BuildFlatMasterSchema(schema_path_, filedata_);
 }
 
 void XMLFlatLoader::LoadInitialAgents() {

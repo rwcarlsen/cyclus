@@ -34,9 +34,9 @@ void LoadStringstreamFromFile(std::stringstream& stream, std::string file) {
   file_stream.close();
 }
 
-std::vector<AgentSpec> ParseSpecs(std::string infile) {
+std::vector<AgentSpec> ParseSpecs(std::string data) {
   std::stringstream input;
-  LoadStringstreamFromFile(input, infile);
+  input << data;
   XMLParser parser_;
   parser_.Init(input);
   InfileTree xqe(parser_);
@@ -61,7 +61,7 @@ std::vector<AgentSpec> ParseSpecs(std::string infile) {
   return specs;
 }
 
-std::string BuildMasterSchema(std::string schema_path, std::string infile) {
+std::string BuildMasterSchema(std::string schema_path, std::string data) {
   Timer ti;
   Recorder rec;
   Context ctx(&ti, &rec);
@@ -70,7 +70,7 @@ std::string BuildMasterSchema(std::string schema_path, std::string infile) {
   LoadStringstreamFromFile(schema, schema_path);
   std::string master = schema.str();
 
-  std::vector<AgentSpec> specs = ParseSpecs(infile);
+  std::vector<AgentSpec> specs = ParseSpecs(data);
 
   std::map<std::string, std::string> subschemas;
 
@@ -138,9 +138,9 @@ XMLFileLoader::XMLFileLoader(Recorder* r,
   ctx_ = new Context(&ti_, rec_);
 
   schema_path_ = schema_file;
-  file_ = input_file;
   std::stringstream input;
-  LoadStringstreamFromFile(input, file_);
+  LoadStringstreamFromFile(input, input_file);
+  filedata_ = input.str();
   parser_ = boost::shared_ptr<XMLParser>(new XMLParser());
   parser_->Init(input);
 
@@ -149,12 +149,30 @@ XMLFileLoader::XMLFileLoader(Recorder* r,
       ->Record();
 }
 
+XMLFileLoader::XMLFileLoader(Recorder* r,
+                             QueryableBackend* b,
+                             std::string input_content) : b_(b), rec_(r) {
+  ctx_ = new Context(&ti_, rec_);
+
+  
+  schema_path_ = Env::rng_schema(false);
+  filedata_ = input_content;
+  std::stringstream input;
+  input << filedata_;
+  parser_ = boost::shared_ptr<XMLParser>(new XMLParser());
+  parser_->Init(input);
+
+  ctx_->NewDatum("InputFiles")
+      ->AddVal("Data", Blob(filedata_))
+      ->Record();
+}
+
 XMLFileLoader::~XMLFileLoader() {
   delete ctx_;
 }
 
 std::string XMLFileLoader::master_schema() {
-  return BuildMasterSchema(schema_path_, file_);
+  return BuildMasterSchema(schema_path_, filedata_);
 }
 
 void XMLFileLoader::LoadSim() {
@@ -232,7 +250,7 @@ void XMLFileLoader::LoadRecipes() {
 }
 
 void XMLFileLoader::LoadSpecs() {
-  std::vector<AgentSpec> specs = ParseSpecs(file_);
+  std::vector<AgentSpec> specs = ParseSpecs(filedata_);
   for (int i = 0; i < specs.size(); ++i) {
     specs_[specs[i].alias()] = specs[i];
   }
