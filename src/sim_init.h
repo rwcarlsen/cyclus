@@ -34,7 +34,9 @@ class SimInit {
 
   /// EXPERIMENTAL (might not work properly). Restarts a simulation from time t
   /// with data from b identified by simid.  The newly configured simulation
-  /// will run with a new simulation id.
+  /// will run with a new simulation id.  Creates a new recorder for the
+  /// simulation with no registered backends that can be accessed
+  /// via the rec member function.
   void Restart(QueryableBackend* b, boost::uuids::uuid sim_id, int t);
 
   /// NOT IMPLEMENTED. Initializes a simulation branched from prev_sim_id at

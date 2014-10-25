@@ -1,0 +1,42 @@
+<simulation>
+  <control>
+    <duration>2</duration>
+    <startmonth>1</startmonth>
+    <startyear>2000</startyear>
+  </control>
+
+  <archetypes>
+      <spec> <path>{{path}}</path><lib>{{lib}}</lib><name>{{name}}</name> </spec>
+  </archetypes>
+
+  <facility>
+    <name>state_test_prototype</name>
+    <config>
+      <{{name}}>
+        {{config}}
+      </{{name}}>
+    </config>
+  </facility>
+
+  <region>
+    <name>SingleRegion</name>
+    <config> <NullRegion/> </config>
+    <institution>
+      <name>SingleInstitution</name>
+      <config> <NullInst/> </config>
+      <initialfacilitylist>
+        <entry>
+          <prototype>state_test_prototype</prototype>
+          <number>1</number>
+        </entry>
+      </initialfacilitylist>
+    </institution>
+  </region>
+
+  <recipe>
+    <name>test_recipe</name>
+    <basis>mass</basis>
+    <nuclide> <id>010010000</id> <comp>1</comp> </nuclide>
+  </recipe>
+
+</simulation>
