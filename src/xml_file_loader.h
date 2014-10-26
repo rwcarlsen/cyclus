@@ -47,7 +47,7 @@ class XMLFileLoader {
                 const std::string input_file = "");
 
   /// Same as other constructor, except pass in input file data instead of
-  /// input file path.  Uses the default Cyclus schema.
+  /// input file path.  Uses the flat cyclus schema.
   XMLFileLoader(Recorder* r, QueryableBackend* b, std::string input_content, bool unused);
 
   virtual ~XMLFileLoader();

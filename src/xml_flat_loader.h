@@ -19,6 +19,10 @@ class XMLFlatLoader : public XMLFileLoader {
                 const std::string load_filename = "")
       : XMLFileLoader(r, b, schema_path, load_filename) {}
 
+  XMLFlatLoader(Recorder* r, QueryableBackend* b,
+                std::string input_content, bool unused)
+      : XMLFileLoader(r, b, input_content, unused) {}
+
   /// Creates all initial agent instances from the input file.
   void LoadInitialAgents();
 

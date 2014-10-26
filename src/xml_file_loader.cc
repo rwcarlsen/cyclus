@@ -156,7 +156,7 @@ XMLFileLoader::XMLFileLoader(Recorder* r,
   ctx_ = new Context(&ti_, rec_);
 
   
-  schema_path_ = Env::rng_schema(false);
+  schema_path_ = Env::rng_schema(true);
   filedata_ = input_content;
   std::stringstream input;
   input << filedata_;

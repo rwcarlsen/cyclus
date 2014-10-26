@@ -1,4 +1,5 @@
 <simulation>
+  <schematype>flat</schematype>
   <control>
     <duration>2</duration>
     <startmonth>1</startmonth>
@@ -6,35 +7,25 @@
   </control>
 
   <archetypes>
-      <spec> <path>{{path}}</path><lib>{{lib}}</lib><name>{{name}}</name> </spec>
+      <spec> {{path}} <lib>{{lib}}</lib><name>{{name}}</name> </spec>
   </archetypes>
 
-  <facility>
-    <name>state_test_prototype</name>
+  <prototype>
+    <name>snaptest_prototype</name>
     <config>
       <{{name}}>
         {{config}}
       </{{name}}>
     </config>
-  </facility>
+  </prototype>
 
-  <region>
-    <name>SingleRegion</name>
-    <config> <NullRegion/> </config>
-    <institution>
-      <name>SingleInstitution</name>
-      <config> <NullInst/> </config>
-      <initialfacilitylist>
-        <entry>
-          <prototype>state_test_prototype</prototype>
-          <number>1</number>
-        </entry>
-      </initialfacilitylist>
-    </institution>
-  </region>
+  <agent>
+    <name>snaptest_agent1</name>
+    <prototype>snaptest_prototype</prototype>
+  </agent>
 
   <recipe>
-    <name>test_recipe</name>
+    <name>dummy_recipe</name>
     <basis>mass</basis>
     <nuclide> <id>010010000</id> <comp>1</comp> </nuclide>
   </recipe>

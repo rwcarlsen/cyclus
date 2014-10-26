@@ -58,6 +58,7 @@ int main(int argc, char* argv[]) {
   if (ret > -1) {
     return ret;
   }
+  warn_limit = 0;
 
   // load templated test input file and user specified prototype config
   std::string fpath = Env::GetInstallPath() + "/share/cyclus/snaptest.xml";
@@ -65,26 +66,29 @@ int main(int argc, char* argv[]) {
   LoadStringstreamFromFile(ss, fpath);
   std::string infile = ss.str();
 
-  boost::replace_all(infile, "{{path}}", ai.spec.path());
+  if (ai.spec.path() != "") {
+    boost::replace_all(infile, "{{path}}", "<path>" + ai.spec.path() + "</path>");
+  } else {
+    boost::replace_all(infile, "{{path}}", "");
+  }
   boost::replace_all(infile, "{{lib}}", ai.spec.lib());
   boost::replace_all(infile, "{{name}}", ai.spec.agent());
   boost::replace_all(infile, "{{config}}", ai.config);
 
-  FileDeleter fd("snaptest_db.sqlite");
+  //FileDeleter fd("snaptest_db.sqlite");
   FullBackend* fback = new SqliteBack("snaptest_db.sqlite");
   RecBackend::Deleter bdel;
   Recorder rec;  // Must be after backend deleter because ~Rec does flushing
+  rec.RegisterBackend(fback);
+  bdel.Add(fback);
 
   try {
-    XMLFileLoader l(&rec, fback, infile, false);
+    XMLFlatLoader l(&rec, fback, infile, false);
     l.LoadSim();
   } catch (cyclus::Error e) {
     std::cout << e.what() << "\n";
     return 1;
   }
-
-  rec.RegisterBackend(fback);
-  bdel.Add(fback);
 
   SimInit si;
   si.Init(&rec, fback); // creates first snapshot
