@@ -26,6 +26,22 @@ INSTALL(
     COMPONENT core
     )
 
+#### cyclus agent state tester app #####
+SET(snaptest_cli 
+    cyclus.cc
+    )
+
+ADD_EXECUTABLE(snaptest_cli snaptest.cc)
+set_target_properties(snaptest_cli PROPERTIES OUTPUT_NAME snaptest)
+
+TARGET_LINK_LIBRARIES(snaptest_cli dl ${LIBS} cyclus)
+
+INSTALL(
+    TARGETS snaptest_cli
+    RUNTIME DESTINATION bin
+    COMPONENT snaptest
+    )
+
 ##############################################################################################
 ###################################### end cyclus app ########################################
 ##############################################################################################

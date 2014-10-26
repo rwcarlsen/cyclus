@@ -151,7 +151,8 @@ XMLFileLoader::XMLFileLoader(Recorder* r,
 
 XMLFileLoader::XMLFileLoader(Recorder* r,
                              QueryableBackend* b,
-                             std::string input_content) : b_(b), rec_(r) {
+                             std::string input_content,
+                             bool unused) : b_(b), rec_(r) {
   ctx_ = new Context(&ti_, rec_);
 
   
