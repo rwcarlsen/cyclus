@@ -35,6 +35,23 @@ struct ArgInfo {
 
 int ParseCliArgs(ArgInfo* ai, int argc, char* argv[]);
 
+class FileDeleter {
+ public:
+  FileDeleter(std::string path) {
+    path_ = path;
+    if (boost::filesystem::exists(path_))
+      remove(path_.c_str());
+  }
+
+  ~FileDeleter() {
+    if (boost::filesystem::exists(path_))
+      remove(path_.c_str());
+  }
+
+ private:
+  std::string path_;
+};
+
 int main(int argc, char* argv[]) {
   ArgInfo ai;
   int ret = ParseCliArgs(&ai, argc, argv);
@@ -53,12 +70,18 @@ int main(int argc, char* argv[]) {
   boost::replace_all(infile, "{{name}}", ai.spec.agent());
   boost::replace_all(infile, "{{config}}", ai.config);
 
-  FullBackend* fback = new SqliteBack("test_db.sqlite");
+  FileDeleter fd("snaptest_db.sqlite");
+  FullBackend* fback = new SqliteBack("snaptest_db.sqlite");
   RecBackend::Deleter bdel;
   Recorder rec;  // Must be after backend deleter because ~Rec does flushing
 
-  XMLFileLoader l(&rec, fback, infile, false);
-  l.LoadSim();
+  try {
+    XMLFileLoader l(&rec, fback, infile, false);
+    l.LoadSim();
+  } catch (cyclus::Error e) {
+    std::cout << e.what() << "\n";
+    return 1;
+  }
 
   rec.RegisterBackend(fback);
   bdel.Add(fback);
@@ -117,4 +140,5 @@ int ParseCliArgs(ArgInfo* ai, int argc, char* argv[]) {
 
   return -1;
 }
+
 
