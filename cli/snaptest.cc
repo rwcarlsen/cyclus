@@ -75,8 +75,8 @@ int main(int argc, char* argv[]) {
   boost::replace_all(infile, "{{name}}", ai.spec.agent());
   boost::replace_all(infile, "{{config}}", ai.config);
 
-  //FileDeleter fd("snaptest_db.sqlite");
-  FullBackend* fback = new SqliteBack("snaptest_db.sqlite");
+  //FileDeleter fd("snaptest.sqlite");
+  FullBackend* fback = new SqliteBack("snaptest.sqlite");
   RecBackend::Deleter bdel;
   Recorder rec;  // Must be after backend deleter because ~Rec does flushing
   rec.RegisterBackend(fback);
@@ -91,17 +91,12 @@ int main(int argc, char* argv[]) {
   }
 
   SimInit si;
-  si.Init(&rec, fback); // creates first snapshot
-
-  // initialize another simulation from previous si's time 0 snapshot
-  SimInit si2;
-  si2.Restart(fback, rec.sim_id(), 0);
-  si2.recorder()->RegisterBackend(fback);
-  si2.context()->Snapshot(); // schedule snapshot for start first timestep (0).
-  si2.timer()->RunSim();
+  si.Restart(fback, rec.sim_id(), 0); // creates first snapshot
+  si.recorder()->RegisterBackend(fback);
+  si.context()->Snapshot(); // schedule snapshot for start first timestep (0).
+  si.timer()->RunSim();
 
   // compare agent-state rows for the two sim id's for each time zero snapshot.
-
   rec.Flush();
   return 0;
 }
