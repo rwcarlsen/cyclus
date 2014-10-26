@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
@@ -44,20 +43,21 @@ int main(int argc, char* argv[]) {
   }
 
   // load templated test input file and user specified prototype config
+  std::string fpath = Env::GetInstallPath() + "/share/cyclus/snaptest.xml";
   std::stringstream ss;
-  LoadStringstreamFromFile(ss, "state_test.xml");
-  std::string s = ss.str();
+  LoadStringstreamFromFile(ss, fpath);
+  std::string infile = ss.str();
 
-  boost::replace_all(s, "{{path}}", ai.spec.path());
-  boost::replace_all(s, "{{lib}}", ai.spec.lib());
-  boost::replace_all(s, "{{name}}", ai.spec.agent());
-  boost::replace_all(s, "{{config}}", ai.config);
+  boost::replace_all(infile, "{{path}}", ai.spec.path());
+  boost::replace_all(infile, "{{lib}}", ai.spec.lib());
+  boost::replace_all(infile, "{{name}}", ai.spec.agent());
+  boost::replace_all(infile, "{{config}}", ai.config);
 
   FullBackend* fback = new SqliteBack("test_db.sqlite");
   RecBackend::Deleter bdel;
   Recorder rec;  // Must be after backend deleter because ~Rec does flushing
 
-  XMLFileLoader l(&rec, fback, s, false);
+  XMLFileLoader l(&rec, fback, infile, false);
   l.LoadSim();
 
   rec.RegisterBackend(fback);
