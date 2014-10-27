@@ -172,79 +172,65 @@ void TestTable(Ctx ctx) {
 }
 
 void TestField(Ctx ctx) {
-  SqlStatement::Ptr stmt;
+  SqlStatement::Ptr stmt1;
+  SqlStatement::Ptr stmt2;
   if (ctx.type > VL_STRING) {
-    stmt = ctx.db->Prepare("SELECT hex(SimId),hex("+ctx.field+") FROM "+ctx.tbl+" WHERE SimTime=0 AND AgentId=?");
+    stmt1 = ctx.db->Prepare("SELECT hex("+ctx.field+") FROM "+ctx.tbl+" WHERE SimTime=0 AND AgentId=? AND hex(SimId)=?");
+    stmt2 = ctx.db->Prepare("SELECT hex("+ctx.field+") FROM "+ctx.tbl+" WHERE SimTime=0 AND AgentId=? AND hex(SimId)=?");
   } else {
-    stmt = ctx.db->Prepare("SELECT hex(SimId),"+ctx.field+" FROM "+ctx.tbl+" WHERE SimTime=0 AND AgentId=?");
+    stmt1 = ctx.db->Prepare("SELECT "+ctx.field+" FROM "+ctx.tbl+" WHERE SimTime=0 AND AgentId=? AND hex(SimId)=?");
+    stmt2 = ctx.db->Prepare("SELECT "+ctx.field+" FROM "+ctx.tbl+" WHERE SimTime=0 AND AgentId=? AND hex(SimId)=?");
   }
-  stmt->BindInt(1, ctx.agentid);
+  stmt1->BindInt(1, ctx.agentid);
+  stmt1->BindText(2, ctx.simid1.c_str());
+  stmt2->BindInt(1, ctx.agentid);
+  stmt2->BindText(2, ctx.simid2.c_str());
 
-  if (!stmt->Step()) {
-    throw Error("ERROR: not enough rows in table "+ctx.tbl);
-  }
-  std::string ida = stmt->GetText(0, NULL);
-  std::string idb;
-
-  switch (ctx.type) {
-    case BOOL: {
-      bool a = stmt->GetInt(1);
-      if (!stmt->Step()) {
-        throw Error("ERROR: not enough rows in table "+ctx.tbl);
-      }
-      idb = stmt->GetText(0, NULL);
-      bool b = stmt->GetInt(1);
-      if (a != b) {
-        std::cout << ctx.tbl << "." << ctx.field << " (bool):  " << a << " != " << b << "\n";
-      }
-      break;
-    } case INT: {
-      int a = stmt->GetInt(1);
-      if (!stmt->Step()) {
-        throw Error("ERROR: not enough rows in table "+ctx.tbl);
-      }
-      idb = stmt->GetText(0, NULL);
-      int b = stmt->GetInt(1);
-      if (a != b) {
-        std::cout << ctx.tbl << "." << ctx.field << " (int):  " << a << " != " << b << "\n";
-      }
-      break;
-   } case FLOAT:
-     case DOUBLE: {
-      double a = stmt->GetDouble(1);
-      if (!stmt->Step()) {
-        throw Error("ERROR: not enough rows in table "+ctx.tbl);
-      }
-      idb = stmt->GetText(0, NULL);
-      double b = stmt->GetDouble(1);
-      if (a != b) {
-        std::cout << ctx.tbl << "." << ctx.field << " (double):  " << a << " != " << b << "\n";
-      }
-      break;
-   } case STRING:
-     case VL_STRING: {
-      std::string a = stmt->GetText(1, NULL);
-      if (!stmt->Step()) {
-        throw Error("ERROR: not enough rows in table "+ctx.tbl);
-      }
-      idb = stmt->GetText(0, NULL);
-      std::string b = stmt->GetText(1, NULL);
-      if (a != b) {
-        std::cout << ctx.tbl << "." << ctx.field << " (string):  " << a << " != " << b << "\n";
-      }
-      break;
-   } default: {
-      std::string a = stmt->GetText(1, NULL);
-      if (!stmt->Step()) {
-        throw Error("ERROR: not enough rows in table "+ctx.tbl);
-      }
-      idb = stmt->GetText(0, NULL);
-      std::string b = stmt->GetText(1, NULL);
-      if (a != b) {
-        std::cout << ctx.tbl << "." << ctx.field << " (other):  " << a << " != " << b << "\n";
-      }
-      break;
-   }
+  int i = 0;
+  while (stmt1->Step()) {
+    i++;
+    if (!stmt2->Step()) {
+      throw Error("not enough rows in second snapshot of "+ctx.tbl);
+    }
+    switch (ctx.type) {
+      case BOOL: {
+        bool a = stmt1->GetInt(0);
+        bool b = stmt2->GetInt(0);
+        if (a != b) {
+          std::cout << ctx.tbl << "." << ctx.field << "." << i << " (bool):  " << a << " != " << b << "\n";
+        }
+        break;
+      } case INT: {
+        int a = stmt1->GetInt(0);
+        int b = stmt2->GetInt(0);
+        if (a != b) {
+          std::cout << ctx.tbl << "." << ctx.field << "." << i << " (int):  " << a << " != " << b << "\n";
+        }
+        break;
+     } case FLOAT:
+       case DOUBLE: {
+        double a = stmt1->GetDouble(0);
+        double b = stmt2->GetDouble(0);
+        if (a != b) {
+          std::cout << ctx.tbl << "." << ctx.field << "." << i << " (double):  " << a << " != " << b << "\n";
+        }
+        break;
+     } case STRING:
+       case VL_STRING: {
+        std::string a = stmt1->GetText(0, NULL);
+        std::string b = stmt2->GetText(0, NULL);
+        if (a != b) {
+          std::cout << ctx.tbl << "." << ctx.field << "." << i << " (string):  " << a << " != " << b << "\n";
+        }
+        break;
+     } default: {
+        std::string a = stmt1->GetText(0, NULL);
+        std::string b = stmt2->GetText(0, NULL);
+        if (a != b) {
+          std::cout << ctx.tbl << "." << ctx.field << "." << i << " (other):  " << a << " != " << b << "\n";
+        }
+     }
+    }
   }
 }
 
