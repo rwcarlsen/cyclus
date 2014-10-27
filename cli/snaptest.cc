@@ -22,8 +22,7 @@ namespace fs = boost::filesystem;
 
 static std::string usage = "Usage:   snaptest [opts] <agent-spec> <config-file>";
 
-static bool proto_err = false;
-static bool snaps_err = false;
+static bool fail = false;
 
 using namespace cyclus;
 
@@ -127,18 +126,12 @@ int main(int argc, char* argv[]) {
 
   TestSnaps(ai.spec);
 
-  if (snaps_err) {
+  if (fail) {
     std::cout << "\nLikely errors in one or more of the following member functions:\n"
               << "    - InitFrom(QueryableBackend*)\n"
+              << "    - Snapshot\n"
               << "    - InitFrom(Agent*)\n"
               << "    - InitInv\n"
-              << "    - Snapshot\n"
-              << "    - SnapshotInv\n";
-    return 1;
-  } else if (proto_err) {
-    std::cout << "\nLikely errors in one or more of the following member functions:\n"
-              << "    - InitFrom(Agent*)\n"
-              << "    - Snapshot\n"
               << "    - SnapshotInv\n";
     return 1;
   }
@@ -203,10 +196,29 @@ void TestTable(Ctx ctx) {
   }
 }
 
+template<class T>
+std::string Compare(T a, T b, T c) {
+  std::stringstream ss;
+  if (a != b || b != c) {
+    ss << a;
+    if (a != b) {
+      ss << " != " << b;
+    } else {
+      ss << " == " << b;
+    }
+    if (b != c) {
+      ss << " != " << c;
+    } else {
+      ss << " == " << c;
+    }
+  } 
+  return ss.str();
+}
+
 void TestField(Ctx ctx) {
-  SqlStatement::Ptr stmt1; // agent snapshot 1
-  SqlStatement::Ptr stmt2; // agent snapshot 2
-  SqlStatement::Ptr stmt3; // prototype snapshot
+  SqlStatement::Ptr stmt1; // prototype snapshot
+  SqlStatement::Ptr stmt2; // agent snapshot 1
+  SqlStatement::Ptr stmt3; // agent snapshot 2
   if (ctx.type > VL_STRING) {
     stmt1 = ctx.db->Prepare("SELECT hex("+ctx.field+") FROM "+ctx.tbl+" WHERE SimTime=0 AND AgentId=? AND hex(SimId)=?");
     stmt2 = ctx.db->Prepare("SELECT hex("+ctx.field+") FROM "+ctx.tbl+" WHERE SimTime=0 AND AgentId=? AND hex(SimId)=?");
@@ -216,12 +228,12 @@ void TestField(Ctx ctx) {
     stmt2 = ctx.db->Prepare("SELECT "+ctx.field+" FROM "+ctx.tbl+" WHERE SimTime=0 AND AgentId=? AND hex(SimId)=?");
     stmt3 = ctx.db->Prepare("SELECT "+ctx.field+" FROM "+ctx.tbl+" WHERE SimTime=0 AND AgentId=? AND hex(SimId)=?");
   }
-  stmt1->BindInt(1, ctx.agentid);
+  stmt1->BindInt(1, ctx.protoid);
   stmt1->BindText(2, ctx.simid1.c_str());
   stmt2->BindInt(1, ctx.agentid);
-  stmt2->BindText(2, ctx.simid2.c_str());
-  stmt3->BindInt(1, ctx.protoid);
-  stmt3->BindText(2, ctx.simid1.c_str());
+  stmt2->BindText(2, ctx.simid1.c_str());
+  stmt3->BindInt(1, ctx.agentid);
+  stmt3->BindText(2, ctx.simid2.c_str());
 
   std::string tblname = ctx.tbl;
   tblname.erase(0, std::string("AgentState").size());
@@ -230,85 +242,55 @@ void TestField(Ctx ctx) {
   int i = 0;
   while (stmt1->Step()) {
     i++;
+    std::stringstream ss;
+    ss << tblname << "." << ctx.field << " row " << i << ":  ";
+    std::string prefix = ss.str();
+
     if (!stmt2->Step()) {
       throw Error("not enough rows in second snapshot of "+ctx.tbl);
     }
     if (!stmt3->Step()) {
       throw Error("not enough rows in prototype snapshot of "+ctx.tbl);
     }
-    std::stringstream ss;
-    ss << tblname << "." << ctx.field << " row " << i;
-    std::string prefix = ss.str();
 
-    std::string problem;
+    std::string msg;
     switch (ctx.type) {
       case BOOL: {
         bool a = stmt1->GetInt(0);
         bool b = stmt2->GetInt(0);
         bool c = stmt3->GetInt(0);
-        if (c != a) {
-          std::cout << prefix << " (proto v snap1):  " << c << " != " << a << "\n";
-          proto_err = true;
-        } 
-        if (a != b) {
-          snaps_err = true;
-          std::cout << prefix << " (snap1 v snap2):  " << a << " != " << b << "\n";
-        }
+        msg = Compare(a, b, c);
         break;
       } case INT: {
         int a = stmt1->GetInt(0);
         int b = stmt2->GetInt(0);
         int c = stmt3->GetInt(0);
-        if (c != a) {
-          proto_err = true;
-          std::cout << prefix << " (proto v snap1):  " << c << " != " << a << "\n";
-        } 
-        if (a != b) {
-          snaps_err = true;
-          std::cout << prefix << " (snap1 v snap2):  " << a << " != " << b << "\n";
-        }
+        msg = Compare(a, b, c);
         break;
      } case FLOAT:
        case DOUBLE: {
         double a = stmt1->GetDouble(0);
         double b = stmt2->GetDouble(0);
         double c = stmt3->GetDouble(0);
-        if (c != a) {
-          proto_err = true;
-          std::cout << prefix << " (proto v snap1):  " << c << " != " << a << "\n";
-        } 
-        if (a != b) {
-          snaps_err = true;
-          std::cout << prefix << " (snap1 v snap2):  " << a << " != " << b << "\n";
-        }
+        msg = Compare(a, b, c);
         break;
      } case STRING:
        case VL_STRING: {
         std::string a = stmt1->GetText(0, NULL);
         std::string b = stmt2->GetText(0, NULL);
         std::string c = stmt3->GetText(0, NULL);
-        if (c != a) {
-          proto_err = true;
-          std::cout << prefix << " (proto v snap1):  " << c << " != " << a << "\n";
-        } 
-        if (a != b) {
-          snaps_err = true;
-          std::cout << prefix << " (snap1 v snap2):  " << a << " != " << b << "\n";
-        }
+        msg = Compare(a, b, c);
         break;
      } default: {
         std::string a = stmt1->GetText(0, NULL);
         std::string b = stmt2->GetText(0, NULL);
         std::string c = stmt3->GetText(0, NULL);
-        if (c != a) {
-          proto_err = true;
-          std::cout << prefix << " (proto v snap1):  " << c << " != " << a << "\n";
-        } 
-        if (a != b) {
-          snaps_err = true;
-          std::cout << prefix << " (snap1 v snap2):  " << a << " != " << b << "\n";
-        }
+        msg = Compare(a, b, c);
      }
+    }
+    if (msg != "") {
+      fail = true;
+      std::cout << prefix << msg << "\n";
     }
   }
 }
