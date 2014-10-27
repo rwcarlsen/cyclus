@@ -76,7 +76,13 @@ int main(int argc, char* argv[]) {
   remove("snaptest.sqlite");
   std::string fpath = Env::GetInstallPath() + "/share/cyclus/snaptest.xml";
   std::stringstream ss;
-  LoadStringstreamFromFile(ss, fpath);
+  try {
+    LoadStringstreamFromFile(ss, fpath);
+  } catch (Error err) {
+    std::cerr << err.what() << "\n";
+    return 1;
+  }
+
   std::string infile = ss.str();
 
   if (ai.spec.path() != "") {
@@ -88,7 +94,7 @@ int main(int argc, char* argv[]) {
   boost::replace_all(infile, "{{name}}", ai.spec.agent());
   boost::replace_all(infile, "{{config}}", ai.config);
 
-  //FileDeleter fd("snaptest.sqlite");
+  FileDeleter fd("snaptest.sqlite");
   FullBackend* fback = new SqliteBack("snaptest.sqlite");
 
   { // manual block scoping forces proper closure of recorder and sqlite db
@@ -275,7 +281,12 @@ int ParseCliArgs(ArgInfo* ai, int argc, char* argv[]) {
   ai->spec = AgentSpec(ai->vm["spec"].as<std::string>());
 
   std::stringstream ss;
-  LoadStringstreamFromFile(ss, ai->vm["config"].as<std::string>());
+  try {
+    LoadStringstreamFromFile(ss, ai->vm["config"].as<std::string>());
+  } catch (Error err) {
+    std::cerr << err.what() << "\n";
+    return 1;
+  }
   ai->config = ss.str();
 
   return -1;
