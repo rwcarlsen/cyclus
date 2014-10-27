@@ -11,12 +11,10 @@
 #include <boost/uuid/string_generator.hpp>
 
 #include "cyclus.h"
-#include "hdf5_back.h"
-#include "pyne.h"
 #include "query_backend.h"
 #include "sim_init.h"
 #include "sqlite_back.h"
-#include "xml_file_loader.h"
+#include "sqlite_db.h"
 #include "xml_flat_loader.h"
 
 namespace po = boost::program_options;
@@ -52,6 +50,20 @@ class FileDeleter {
   std::string path_;
 };
 
+struct Ctx {
+  SqliteDb* db;
+  std::string simid1;
+  std::string simid2;
+  int agentid;
+  std::string tbl;
+  std::string field;
+  int type;
+};
+
+void TestSnaps();
+void TestTable(Ctx ctx);
+void TestField(Ctx ctx);
+
 int main(int argc, char* argv[]) {
   ArgInfo ai;
   int ret = ParseCliArgs(&ai, argc, argv);
@@ -61,6 +73,7 @@ int main(int argc, char* argv[]) {
   warn_limit = 0;
 
   // load templated test input file and user specified prototype config
+  remove("snaptest.sqlite");
   std::string fpath = Env::GetInstallPath() + "/share/cyclus/snaptest.xml";
   std::stringstream ss;
   LoadStringstreamFromFile(ss, fpath);
@@ -77,28 +90,156 @@ int main(int argc, char* argv[]) {
 
   //FileDeleter fd("snaptest.sqlite");
   FullBackend* fback = new SqliteBack("snaptest.sqlite");
-  RecBackend::Deleter bdel;
-  Recorder rec;  // Must be after backend deleter because ~Rec does flushing
-  rec.RegisterBackend(fback);
-  bdel.Add(fback);
 
-  try {
-    XMLFlatLoader l(&rec, fback, infile, false);
-    l.LoadSim();
-  } catch (cyclus::Error e) {
-    std::cout << e.what() << "\n";
-    return 1;
+  { // manual block scoping forces proper closure of recorder and sqlite db
+    Recorder rec;  // Must be after backend deleter because ~Rec does flushing
+    rec.RegisterBackend(fback);
+
+    try {
+      XMLFlatLoader l(&rec, fback, infile, false);
+      l.LoadSim();
+    } catch (cyclus::Error e) {
+      std::cout << e.what() << "\n";
+      return 1;
+    }
+
+    SimInit si;
+    si.Restart(fback, rec.sim_id(), 0); // creates first snapshot
+    si.recorder()->RegisterBackend(fback);
+    si.context()->Snapshot(); // schedule snapshot for start first timestep (0).
+    si.timer()->RunSim();
+    rec.Flush();
+    fback->Flush();
   }
 
-  SimInit si;
-  si.Restart(fback, rec.sim_id(), 0); // creates first snapshot
-  si.recorder()->RegisterBackend(fback);
-  si.context()->Snapshot(); // schedule snapshot for start first timestep (0).
-  si.timer()->RunSim();
+  delete fback;
 
-  // compare agent-state rows for the two sim id's for each time zero snapshot.
-  rec.Flush();
+  TestSnaps();
+
   return 0;
+}
+
+void TestSnaps() {
+  SqliteDb db("snaptest.sqlite", true);
+  db.open();
+  Ctx ctx;
+  ctx.db = &db;
+
+  // get simulation ids and agent id;
+  SqlStatement::Ptr stmt;
+  stmt = db.Prepare("SELECT hex(SimId),AgentId FROM AgentEntry;");
+  while (stmt->Step()) {
+    ctx.simid2 = stmt->GetText(0, NULL);
+    ctx.agentid = stmt->GetInt(1);
+  }
+  stmt = db.Prepare("SELECT hex(SimId) FROM Info WHERE hex(SimId) != ?;");
+  stmt->BindText(1, ctx.simid2.c_str());
+  while (stmt->Step()) {
+    ctx.simid1 = stmt->GetText(0, NULL);
+  }
+
+  stmt = db.Prepare("SELECT name FROM sqlite_master WHERE type='table'");
+
+  while (stmt->Step()) {
+    ctx.tbl = stmt->GetText(0, NULL);
+    if (boost::starts_with(ctx.tbl, "AgentState")) {
+      TestTable(ctx);
+    }
+  }
+  db.close();
+}
+
+void TestTable(Ctx ctx) {
+  SqlStatement::Ptr stmt;
+  stmt = ctx.db->Prepare("SELECT Field,Type  FROM FieldTypes WHERE TableName = ?");
+  stmt->BindText(1, ctx.tbl.c_str());
+  while (stmt->Step()) {
+    std::string f = stmt->GetText(0, NULL);
+    if (f == "SimId" || f == "SimTime" || f == "AgentId") {
+      continue;
+    }
+
+    ctx.field = f;
+    ctx.type = stmt->GetInt(1);
+    TestField(ctx);
+  }
+}
+
+void TestField(Ctx ctx) {
+  SqlStatement::Ptr stmt;
+  if (ctx.type > VL_STRING) {
+    stmt = ctx.db->Prepare("SELECT hex(SimId),hex("+ctx.field+") FROM "+ctx.tbl+" WHERE SimTime=0 AND AgentId=?");
+  } else {
+    stmt = ctx.db->Prepare("SELECT hex(SimId),"+ctx.field+" FROM "+ctx.tbl+" WHERE SimTime=0 AND AgentId=?");
+  }
+  stmt->BindInt(1, ctx.agentid);
+
+  if (!stmt->Step()) {
+    throw Error("ERROR: not enough rows in table "+ctx.tbl);
+  }
+  std::string ida = stmt->GetText(0, NULL);
+  std::string idb;
+
+  switch (ctx.type) {
+    case BOOL: {
+      bool a = stmt->GetInt(1);
+      if (!stmt->Step()) {
+        throw Error("ERROR: not enough rows in table "+ctx.tbl);
+      }
+      idb = stmt->GetText(0, NULL);
+      bool b = stmt->GetInt(1);
+      if (a != b) {
+        std::cout << ctx.tbl << "." << ctx.field << " (bool):  " << a << " != " << b << "\n";
+      }
+      break;
+    } case INT: {
+      int a = stmt->GetInt(1);
+      if (!stmt->Step()) {
+        throw Error("ERROR: not enough rows in table "+ctx.tbl);
+      }
+      idb = stmt->GetText(0, NULL);
+      int b = stmt->GetInt(1);
+      if (a != b) {
+        std::cout << ctx.tbl << "." << ctx.field << " (int):  " << a << " != " << b << "\n";
+      }
+      break;
+   } case FLOAT:
+     case DOUBLE: {
+      double a = stmt->GetDouble(1);
+      if (!stmt->Step()) {
+        throw Error("ERROR: not enough rows in table "+ctx.tbl);
+      }
+      idb = stmt->GetText(0, NULL);
+      double b = stmt->GetDouble(1);
+      if (a != b) {
+        std::cout << ctx.tbl << "." << ctx.field << " (double):  " << a << " != " << b << "\n";
+      }
+      break;
+   } case STRING:
+     case VL_STRING: {
+      std::string a = stmt->GetText(1, NULL);
+      if (!stmt->Step()) {
+        throw Error("ERROR: not enough rows in table "+ctx.tbl);
+      }
+      idb = stmt->GetText(0, NULL);
+      std::string b = stmt->GetText(1, NULL);
+      if (a != b) {
+        std::cout << ctx.tbl << "." << ctx.field << " (string):  " << a << " != " << b << "\n";
+      }
+      break;
+   } default: {
+      std::string a = stmt->GetText(1, NULL);
+      if (!stmt->Step()) {
+        throw Error("ERROR: not enough rows in table "+ctx.tbl);
+      }
+      idb = stmt->GetText(0, NULL);
+      std::string b = stmt->GetText(1, NULL);
+      if (a != b) {
+        std::cout << ctx.tbl << "." << ctx.field << " (other):  " << a << " != " << b << "\n";
+      }
+      break;
+   }
+  }
 }
 
 int ParseCliArgs(ArgInfo* ai, int argc, char* argv[]) {

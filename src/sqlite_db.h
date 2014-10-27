@@ -32,7 +32,7 @@ class SqlStatement {
     Reset();
   }
 
-  /// Executes the prepared statement.
+  /// Resets the prepared statement.
   void Reset() {
     Must(sqlite3_reset(stmt_));
     Must(sqlite3_clear_bindings(stmt_));
@@ -84,6 +84,12 @@ class SqlStatement {
   /// Binds the templated sql parameter at index i to val.
   void BindText(int i, const char* val) {
     Must(sqlite3_bind_text(stmt_, i, val, -1, SQLITE_TRANSIENT));
+  }
+
+  /// Returns the specified column name for the active query.  The returned
+  /// pointer is only valid until the next call to Step, Reset, Exec, etc.
+  char* ColName(int col) {
+    sqlite3_column_name(stmt_, col);
   }
 
   /// Binds the templated sql parameter at index i to the value pointed to by
