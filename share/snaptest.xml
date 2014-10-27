@@ -7,8 +7,22 @@
   </control>
 
   <archetypes>
-      <spec> {{path}} <lib>{{lib}}</lib><name>{{name}}</name> </spec>
+    <spec> {{path}} <lib>{{lib}}</lib><name>{{name}}</name> </spec>
+    <spec> <lib>agents</lib><name>Sink</name> </spec>
   </archetypes>
+
+  <prototype>
+    <name>dummy_proto</name>
+    <config>
+      <Sink>
+        <in_commods>
+            <val>dummy_commod</val>
+            <val>dummy_commod2</val>
+        </in_commods>
+        <capacity> 1.23 </capacity>
+      </Sink>
+    </config>
+  </prototype>
 
   <prototype>
     <name>snaptest_prototype</name>
@@ -26,6 +40,11 @@
 
   <recipe>
     <name>dummy_recipe</name>
+    <basis>mass</basis>
+    <nuclide> <id>010010000</id> <comp>1</comp> </nuclide>
+  </recipe>
+  <recipe>
+    <name>dummy_recipe2</name>
     <basis>mass</basis>
     <nuclide> <id>010010000</id> <comp>1</comp> </nuclide>
   </recipe>
