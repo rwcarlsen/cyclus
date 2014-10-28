@@ -29,6 +29,7 @@ SET(
 INSTALL(FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/cyclus_default_unit_test_driver.cc"
     "${CMAKE_CURRENT_SOURCE_DIR}/snaptest.xml"
+    "${CMAKE_CURRENT_SOURCE_DIR}/dynotest.xml"
     "${CMAKE_CURRENT_SOURCE_DIR}/cyclus.rng.in"
     "${CMAKE_CURRENT_SOURCE_DIR}/cyclus-flat.rng.in"
     "${CMAKE_CURRENT_SOURCE_DIR}/cyclus_nuc_data.h5"

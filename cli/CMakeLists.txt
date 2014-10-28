@@ -27,10 +27,6 @@ INSTALL(
     )
 
 #### cyclus agent state tester app #####
-SET(snaptest_cli 
-    cyclus.cc
-    )
-
 ADD_EXECUTABLE(snaptest_cli snaptest.cc)
 set_target_properties(snaptest_cli PROPERTIES OUTPUT_NAME snaptest)
 
@@ -40,6 +36,18 @@ INSTALL(
     TARGETS snaptest_cli
     RUNTIME DESTINATION bin
     COMPONENT snaptest
+    )
+
+#### cyclus agent dyno tester app #####
+ADD_EXECUTABLE(dyno_cli dyno.cc)
+set_target_properties(dyno_cli PROPERTIES OUTPUT_NAME dyno)
+
+TARGET_LINK_LIBRARIES(dyno_cli dl ${LIBS} cyclus)
+
+INSTALL(
+    TARGETS dyno_cli
+    RUNTIME DESTINATION bin
+    COMPONENT dyno
     )
 
 ##############################################################################################
