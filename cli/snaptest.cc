@@ -5,10 +5,6 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/uuid/uuid_io.hpp>
-#include <boost/uuid/string_generator.hpp>
 
 #include "cyclus.h"
 #include "query_backend.h"
@@ -18,13 +14,11 @@
 #include "xml_flat_loader.h"
 
 namespace po = boost::program_options;
-namespace fs = boost::filesystem;
+using namespace cyclus;
 
-static std::string usage = "Usage:   snaptest [opts] <agent-spec> <config-file>";
+static std::string usage = "Usage:  snaptest [opts] <agent-spec> <config-file>";
 
 static bool fail = false;
-
-using namespace cyclus;
 
 struct ArgInfo {
   po::variables_map vm;  // Holds parsed/specified cli opts and values
