@@ -73,5 +73,20 @@ double MatQuery::Amount(Composition::Ptr c) {
   return sum;
 }
 
+double MatQuery::FracComp(std::map<int, double> fracs) {
+  CompMap cm = m_->comp()->mass();
+  Normalize(&cm, m_->quantity());
+  CompMap::iterator it;
+  for (it = cm.begin(); it != cm.end(); ++it) {
+    Nuc n = it->first;
+    if (fracs.count(n) == 0) {
+      cm[n] = 0;
+    } else {
+      cm[n] *= fracs[n];
+    }
+  }
+  return Composition::CreateFromMass(cm);
+}
+
 }  // namespace toolkit
 }  // namespace cyclus

@@ -38,6 +38,11 @@ class MatQuery {
   /// from the material.
   double Amount(Composition::Ptr c);
 
+  /// Returns the resulting composition from extracting the specified
+  /// nuclide fractions out of the material.  fracs maps nuclide id's to
+  /// fractions.  This is especially useful for separations.
+  double FracComp(std::map<int, double> fracs);
+
  private:
   Material::Ptr m_;
 };
