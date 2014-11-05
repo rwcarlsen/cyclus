@@ -11,31 +11,12 @@ std::string Sink::str() {
   return Facility::str();
 }
 
-std::set<cyclus::RequestPortfolio<cyclus::Material>::Ptr>
-Sink::GetMatlRequests() {
-  using cyclus::CapacityConstraint;
-  using cyclus::Material;
-  using cyclus::RequestPortfolio;
-  using cyclus::Request;
-
-  std::set<RequestPortfolio<Material>::Ptr> ports;
-  RequestPortfolio<Material>::Ptr port(new RequestPortfolio<Material>());
-  double amt = Capacity();
-  Material::Ptr mat = cyclus::NewBlankMaterial(amt);
-
-  if (amt > cyclus::eps()) {
-    CapacityConstraint<Material> cc(amt);
-    port->AddConstraint(cc);
-
-    std::vector<std::string>::const_iterator it;
-    for (it = in_commods.begin(); it != in_commods.end(); ++it) {
-      port->AddRequest(mat, this, *it);
-    }
-
-    ports.insert(port);
-  }  // if amt > eps
-
-  return ports;
+void Sink::EnterNotify() {
+  Facility::EnterNotify();
+  policy_.Init(this, &inventory, "storage").Start();
+  for (int i = 0; i < in_commods.size(); i++) {
+    policy_.Set(in_commods[i], DUMMY_RECIPE);
+  }
 }
 
 std::set<cyclus::RequestPortfolio<cyclus::Product>::Ptr>
@@ -65,16 +46,6 @@ Sink::GetProductRequests() {
   }  // if amt > eps
 
   return ports;
-}
-
-void Sink::AcceptMatlTrades(
-    const std::vector< std::pair<cyclus::Trade<cyclus::Material>,
-                                 cyclus::Material::Ptr> >& responses) {
-  std::vector< std::pair<cyclus::Trade<cyclus::Material>,
-  cyclus::Material::Ptr> >::const_iterator it;
-  for (it = responses.begin(); it != responses.end(); ++it) {
-    inventory.Push(it->second);
-  }
 }
 
 void Sink::AcceptProductTrades(

@@ -30,21 +30,13 @@ class Sink : public cyclus::Facility  {
 
   virtual void Tock();
 
-  /// @brief Sink request Materials of their given commodity. Note
-  /// that it is assumed the Sink operates on a single resource type!
-  virtual std::set<cyclus::RequestPortfolio<cyclus::Material>::Ptr>
-      GetMatlRequests();
+  virtual EnterNotify();
 
   /// @brief Sink request Product of their given
   /// commodity. Note that it is assumed the Sink operates on a single
   /// resource type!
   virtual std::set<cyclus::RequestPortfolio<cyclus::Product>::Ptr>
       GetProductRequests();
-
-  /// @brief Sink place accepted trade Materials in their Inventory
-  virtual void AcceptMatlTrades(
-      const std::vector< std::pair<cyclus::Trade<cyclus::Material>,
-                                   cyclus::Material::Ptr> >& responses);
 
   /// @brief Sink place accepted trade Materials in their Inventory
   virtual void AcceptProductTrades(
@@ -75,6 +67,9 @@ class Sink : public cyclus::Facility  {
 
   #pragma cyclus var {'capacity': 'max_inv_size'}
   cyclus::toolkit::ResourceBuff inventory;
+
+  BuyPolicy policy_;
+
 };
 
 }  // namespace cyclus
