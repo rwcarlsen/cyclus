@@ -12,6 +12,8 @@
     <spec> <lib>agents</lib><name>Source</name> </spec>
   </archetypes>
 
+  {{sources}}
+
   <prototype>
     <name>source0</name>
     <config>
@@ -24,53 +26,11 @@
   </prototype>
 
   <prototype>
-    <name>source1</name>
-    <config>
-      <Source>
-        <commod>commod1</commod>
-        <recipe_name>dummy_recipe</recipe_name>
-        <capacity>1e30</capacity>
-      </Source>
-    </config>
-  </prototype>
-
-  <prototype>
-    <name>source2</name>
-    <config>
-      <Source>
-        <commod>commod2</commod>
-        <recipe_name>dummy_recipe</recipe_name>
-        <capacity>1e30</capacity>
-      </Source>
-    </config>
-  </prototype>
-
-  <prototype>
-    <name>source3</name>
-    <config>
-      <Source>
-        <commod>commod3</commod>
-        <recipe_name>dummy_recipe</recipe_name>
-        <capacity>1e30</capacity>
-      </Source>
-    </config>
-  </prototype>
-
-  <prototype>
     <name>sink</name>
     <config>
       <Sink>
         <in_commods>
-            <val>waste0</val>
-            <val>waste1</val>
-            <val>waste2</val>
-            <val>waste3</val>
-            <val>waste4</val>
-            <val>waste5</val>
-            <val>waste6</val>
-            <val>waste7</val>
-            <val>waste8</val>
-            <val>waste9</val>
+            {{sinkcommods}}
         </in_commods>
         <capacity>1e30</capacity>
       </Sink>
@@ -91,25 +51,7 @@
     <prototype>snaptest_prototype</prototype>
   </agent>
 
-  <agent>
-    <name>src0</name>
-    <prototype>source0</prototype>
-  </agent>
-
-  <agent>
-    <name>src1</name>
-    <prototype>source1</prototype>
-  </agent>
-
-  <agent>
-    <name>src2</name>
-    <prototype>source2</prototype>
-  </agent>
-
-  <agent>
-    <name>src3</name>
-    <prototype>source3</prototype>
-  </agent>
+  {{sourceagents}}
 
   <agent>
     <name>snk</name>
@@ -118,11 +60,6 @@
 
   <recipe>
     <name>dummy_recipe</name>
-    <basis>mass</basis>
-    <nuclide> <id>010010000</id> <comp>1</comp> </nuclide>
-  </recipe>
-  <recipe>
-    <name>dummy_recipe2</name>
     <basis>mass</basis>
     <nuclide> <id>010010000</id> <comp>1</comp> </nuclide>
   </recipe>
