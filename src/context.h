@@ -3,6 +3,7 @@
 
 #include <map>
 #include <set>
+#include <random>
 #include <string>
 
 #ifndef CYCPP
@@ -12,9 +13,10 @@
 #include <boost/uuid/uuid_generators.hpp>
 #endif
 
-#include "composition.h"
 #include "agent.h"
+#include "composition.h"
 #include "greedy_solver.h"
+#include "pcg_random.hpp"
 #include "recorder.h"
 
 class SimInitTest;
@@ -91,6 +93,9 @@ class SimInfo {
 
   /// timestep at which simulation branching occurs if any
   int branch_time;
+
+  /// seed value for the context's pseudo random number generator.
+  int64_t rng_seed;
 };
 
 /// A simulation context provides access to necessary simulation-global
@@ -160,6 +165,11 @@ class Context {
     }
     return casted;
   }
+
+  /// Returns a general purpose random number generator engine that can be
+  /// used with the C++ standard library distributions to produce random
+  /// numbers.
+  pcg32& rng() { return rng_; };
 
   /// Destructs and cleans up m (and it's children recursively).
   ///
@@ -271,6 +281,7 @@ class Context {
   ExchangeSolver* solver_;
   Recorder* rec_;
   int trans_id_;
+  pcg32 rng_;
 };
 
 }  // namespace cyclus

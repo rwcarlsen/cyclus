@@ -12,6 +12,7 @@ ENDIF()
 
 # This project name is cyclus.
 PROJECT( CYCLUS )
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 # quiets fortify_source warnings when not compiling with optimizations
 # in linux distros where compilers were compiled with fortify_source enabled by
