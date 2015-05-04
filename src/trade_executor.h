@@ -52,8 +52,20 @@ class TradeExecutor {
   /// @brief execute all trades, collecting responders from bidders and sending
   /// responses to requesters
   void ExecuteTrades() {
+    Warn<IO_WARNING>("this function does not record trades to the database");
     GroupTradesBySupplier(trade_ctx_, trades_);
     GetTradeResponses(trade_ctx_);
+    SendTradeResources(trade_ctx_);
+  }
+
+  /// @brief execute all trades, collecting responders from bidders and sending
+  /// responses to requesters
+  void ExecuteTrades(Context* ctx) {
+    GroupTradesBySupplier(trade_ctx_, trades_);
+    GetTradeResponses(trade_ctx_);
+    if (ctx != NULL) {
+      RecordTrades(ctx);
+    }
     SendTradeResources(trade_ctx_);
   }
 
