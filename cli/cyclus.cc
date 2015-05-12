@@ -195,12 +195,12 @@ int main(int argc, char* argv[]) {
     si.recorder()->RegisterBackend(fback);
   }
 
-  try {
+  //try {
     si.timer()->RunSim();
-  } catch (cyclus::Error err) {
-    std::cerr << err.what() << "\n";
-    return 1;
-  }
+  //} catch (cyclus::Error err) {
+  //  std::cerr << err.what() << "\n";
+  //  return 1;
+  //}
 
   rec.Flush();
 
