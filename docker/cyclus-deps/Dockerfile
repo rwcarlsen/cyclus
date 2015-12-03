@@ -25,8 +25,11 @@ RUN apt-get install -y --force-yes \
     python3 \
     python3-tables \
     python3-numpy \
-    python3-nose
+    python3-nose \
+    python-tables \
+    python-numpy \
+    python-nose
 
-RUN rm /usr/bin/python
-RUN ln -s /usr/bin/python3 /usr/bin/python
+# for debian packaging
+RUN apt-get install -y --force-yes build-essential devscripts debhelper
 
