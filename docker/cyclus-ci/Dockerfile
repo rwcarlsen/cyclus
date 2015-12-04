@@ -8,3 +8,5 @@ WORKDIR /cyclus/Release
 RUN cmake .. -DCMAKE_BUILD_TYPE=Release
 RUN make -j2 && make install
 
+WORKDIR /
+
