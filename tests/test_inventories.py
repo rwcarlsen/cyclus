@@ -6,7 +6,7 @@ import tables
 import numpy as np
 from tools import check_cmd
 from helper import tables_exist, find_ids, exit_times, \
-    h5out, sqliteout, clean_outs, which_outfile
+    h5out, sqliteout, clean_outs, to_ary, which_outfile
 
 """Tests"""
 def test_inventories_false():
@@ -57,17 +57,33 @@ def test_inventories():
             clean_outs()
             return  # don't execute further commands
             
-#        # Get specific table and columns
-#        if outfile == h5out:
-#            output = tables.open_file(h5out, mode = "r")
-#      	    inventory = output.get_node("/ExplicitInventory")[:]
-#            output.close()
-#        else:
-#            conn = sqlite3.connect(outfile)
-#            conn.row_factory = sqlite3.Row
-#            cur = conn.cursor()
-#            exc = cur.execute
-#            inventory = exc('SELECT * FROM ExplicitInventory').fetchall()
-#            conn.close()
-#    
+        # Get specific table and columns
+	table = path[0]
+        if outfile == h5out:
+            output = tables.open_file(h5out, mode = "r")
+      	    inventory = output.get_node(table)[:]
+            output.close()
+        else:
+            conn = sqlite3.connect(outfile)
+            conn.row_factory = sqlite3.Row
+            cur = conn.cursor()
+            exc = cur.execute
+	    sqltable = table.replace('/', '')
+	    sql = "SELECT * FROM %s" % sqltable
+            inventory = exc(sql).fetchall()
+            conn.close()
+        
+	# Find columns of interest
+	quantity = to_ary(inventory, "Quantity")
+	time = to_ary(inventory, "Time")
+
+	# Test that quantity increases as expected with k=1
+	if "Compact" in table:
+	    comp = to_ary(inventory, "Composition")
+	    #compact_func(time, quantity, comp)
+	else:
+	    nuc = to_ary(inventory, "NucId")
+	    #noncompact_func(time, nuc, quantity
+
         clean_outs()
+
