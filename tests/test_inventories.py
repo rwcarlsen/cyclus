@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 from nose.tools import assert_false, assert_true, assert_equal
+from numpy.testing import assert_array_equal
 import os
 import tables
 import numpy as np
@@ -57,11 +58,12 @@ def test_inventories():
             clean_outs()
             return  # don't execute further commands
             
-        # Get specific table and columns
+        # Get specific table
 	table = path[0]
         if outfile == h5out:
             output = tables.open_file(h5out, mode = "r")
       	    inventory = output.get_node(table)[:]
+      	    compositions = output.get_node("/Compositions")[:]
             output.close()
         else:
             conn = sqlite3.connect(outfile)
@@ -71,19 +73,33 @@ def test_inventories():
 	    sqltable = table.replace('/', '')
 	    sql = "SELECT * FROM %s" % sqltable
             inventory = exc(sql).fetchall()
+            compositions = exc('SELECT * FROM Compositions').fetchall()
             conn.close()
         
-	# Find columns of interest
-	quantity = to_ary(inventory, "Quantity")
-	time = to_ary(inventory, "Time")
-
 	# Test that quantity increases as expected with k=1
-	if "Compact" in table:
-	    comp = to_ary(inventory, "Composition")
-	    #compact_func(time, quantity, comp)
+	if "Compact" not in table:
+	    time = to_ary(inventory, "Time")
+	    quantity = to_ary(inventory, "Quantity")
+	    nucid = to_ary(inventory, "NucId")
+	    massfrac = to_ary(compositions, "MassFrac")
+	    nucid_comp = to_ary(compositions, "NucId") 
+	    expected_quantity = []
+	    expected_nucid = []
+	    repeat = 100
+	    for t in time:
+	    	if t != repeat:
+	    	    expected_quantity.append((t+1)*massfrac[1])
+		    expected_nucid.append(nucid_comp[1])
+		else:
+	    	    expected_quantity.append((t+1)*massfrac[0])
+		    expected_nucid.append(nucid_comp[0])
+		t = repeat
+	    assert_array_equal, quantity, expected_quantity
+	    assert_array_equal, nucid, expected_nucid
+            return  # don't execute further commands
 	else:
-	    nuc = to_ary(inventory, "NucId")
-	    #noncompact_func(time, nuc, quantity
+	    # composition will be the same in compact inventory
+	    return  # don't execute further commands
 
         clean_outs()
 
