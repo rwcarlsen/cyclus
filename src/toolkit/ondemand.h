@@ -20,17 +20,19 @@ class Ondemand {
     }
   };
     
-  /// the total amount to request for the time step given the current quantity
-  /// and space available in the buffer being tracked.
-  double TotalQty(double curr_qty, double curr_space) const {
-    return std::min(curr_space, std::max(0.0, Usage() * usage_buf_frac_ - curr_qty));
+  // the total amount to request or fill in for the time step
+  double ToMove() const {
+    double curr_qty = qty_used_.back();
+    return std::max(0.0, MovingUsage() * usage_buf_frac_ - curr_qty);
   }
 
   void use_max() {max_ = true;};
   void use_avg() {max_ = false;};
   void usage_buf_frac(double frac) {usage_buf_frac_ = frac;};
+  void empty_thresh(double qty) {empty_thresh_ = qty;};
+  void window(int width) {window_ = width;};
 
-  double Usage() {
+  double MovingUsage() {
     if (qty_used_->size() < 2) {
       return 0;
     }
@@ -59,14 +61,14 @@ class Ondemand {
     if (prev_qty < empty_thresh_) {
       // demand was probably larger than available inventory so assume
       // demand/virtual-usage is equal to usage plus safety buffer
-      used = Usage() * usage_buf_frac_;
+      used = MovingUsage() * usage_buf_frac_;
     } else {
-      used = buf_->quantity() - prev_qty;
+      used = qty_available - prev_qty;
     }
 
     qty_used_->pop_back();
     qty_used_->push_back(used);
-    qty_used_->push_back(buf_->quantity());
+    qty_used_->push_back(qty_available);
 
     if (qty_used_->size() > window_) {
       qty_used_->pop_front();
@@ -78,7 +80,7 @@ class Ondemand {
   double empty_thresh_;
   double usage_buf_frac_;
   bool max_;
-  double window_;
+  int window_;
   std::list<double>* qty_used_;
 };
 
