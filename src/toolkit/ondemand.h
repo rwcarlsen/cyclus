@@ -1,7 +1,7 @@
 #ifndef CYCLUS_SRC_TOOLKIT_ONDEMAND_H_
 #define CYCLUS_SRC_TOOLKIT_ONDEMAND_H_
 
-#include <vector>
+#include <list>
 
 namespace cyclus {
 namespace toolkit {
@@ -21,8 +21,8 @@ class Ondemand {
   };
     
   // the total amount to request or fill in for the time step
-  double ToMove() const {
-    double curr_qty = qty_used_.back();
+  double ToMove() {
+    double curr_qty = qty_used_->back();
     return std::max(0.0, MovingUsage() * usage_buf_frac_ - curr_qty);
   }
 
@@ -37,7 +37,7 @@ class Ondemand {
       return 0;
     }
 
-    std::list<double>::iterator = it;
+    std::list<double>::iterator it;
     if (max_) {
       double max = 0;
       for (it = qty_used_->begin(); it + 1 != qty_used_->end(); ++it) {
