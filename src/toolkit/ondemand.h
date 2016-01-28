@@ -8,7 +8,7 @@ namespace toolkit {
 
 class Ondemand {
  public:
-  Ondemand() : qty_used_(nullptr), usage_buf_frac_(2.0), max_(false), window_(12), empty_thresh_(1e-6) {};
+  Ondemand() : qty_used_(nullptr), usage_buf_frac_(2.0), max_(true), window_(12), empty_thresh_(1e-6) {};
   virtual ~Ondemand() {};
 
   Ondemand& Init(std::list<double>* qty_used, double usage_guess) {
