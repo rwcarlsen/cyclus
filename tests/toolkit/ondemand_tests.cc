@@ -9,7 +9,7 @@ namespace toolkit {
 void CheckBuy(double usage_guess, int window, double frac, std::vector<double> recv, std::vector<double> used, std::vector<double> want) {
   std::list<double> qty_used;
   Ondemand od;
-  od.Init(&qty_used, usage_guess).window(window).usage_buf_frac(frac).use_max();
+  od.Init(&qty_used, usage_guess).window(window).usage_buf_frac(frac);
 
   double qty = 0.0;
   double surplus = 0;
