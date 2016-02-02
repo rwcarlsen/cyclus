@@ -2,6 +2,7 @@
 #define CYCLUS_SRC_TOOLKIT_ONDEMAND_H_
 
 #include <list>
+#include <iostream>
 
 namespace cyclus {
 namespace toolkit {
@@ -55,15 +56,16 @@ namespace toolkit {
 ///
 class Ondemand {
  public:
-  Ondemand() : qty_used_(nullptr), usage_buf_frac_(2.0), max_(true), window_(12), empty_thresh_(1e-6) {};
+  Ondemand() : qty_used_(nullptr), usage_buf_frac_(2.0), max_(true), window_(24), empty_thresh_(1e-6) {};
   virtual ~Ondemand() {};
 
+  // usage_guess is ignored if qty_used is already initialized with one or
+  // more entries.
   Ondemand& Init(std::list<double>* qty_used, double usage_guess) {
     qty_used_ = qty_used;
-    if (qty_used_->size() < 2) {
+    if (qty_used_->size() < 1) {
       qty_used_->clear();
       qty_used_->push_back(usage_guess);
-      qty_used_->push_back(0);
     }
     return *this;
   };
@@ -81,48 +83,39 @@ class Ondemand {
   Ondemand& window(int width) {window_ = width; return *this;};
 
   double MovingUsage() {
-    if (qty_used_->size() < 2) {
+    if (qty_used_->size() < 1) {
       return 0;
     }
 
     std::list<double>::iterator it;
     if (max_) {
       double max = 0;
-      for (it = qty_used_->begin(); it != qty_used_->end(); ) {
-        double val = *it;
-        ++it;
-        if (it == qty_used_->end()) break;
-
-        if (val > max) {
-          max = val;
-        }
+      for (it = qty_used_->begin(); it != qty_used_->end(); ++it) {
+        max = std::max(max, *it);
       }
       return max;
     } else { // avg
       double tot = 0;
-      for (it = qty_used_->begin(); it != qty_used_->end(); ) {
-        double val = *it;
-        ++it;
-        if (it == qty_used_->end()) break;
-        tot += val;
+      for (it = qty_used_->begin(); it != qty_used_->end(); ++it) {
+        tot += *it;
       }
-      return tot / std::max(1e-100, qty_used_->size() - 1.00);
+      return tot / std::max(1e-100, (double)qty_used_->size());
     }
   }
   
   void UpdateUsage(double pre_use_qty, double post_use_qty) {
-    double prev_qty = qty_used_->back();
     double used = pre_use_qty - post_use_qty; 
-    if (pre_use_qty < empty_thresh_) {
-      // demand was probably larger than available inventory so assume
-      // demand/virtual-usage is equal to usage plus safety buffer
+    if (pre_use_qty <= empty_thresh_) {
+      // didn't have enough initial inventory to satisfy any amount of demand
+      // and so we don't actually know what demand was - just keep it same
+      used = MovingUsage();
+    } else if (pre_use_qty >= MovingUsage() && post_use_qty <= empty_thresh_) {
+      // demand was greater than supply and also greater than current avg/max
+      // usage.
       used = MovingUsage() * usage_buf_frac_;
     }
 
-    qty_used_->pop_back();
     qty_used_->push_back(used);
-    qty_used_->push_back(post_use_qty);
-
     if (qty_used_->size() > window_) {
       qty_used_->pop_front();
     }

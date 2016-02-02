@@ -33,7 +33,6 @@ class Chain {
      std::vector<double> tomoves;
 
      ods[0]->UpdateUsage(prev_qtys[0], qtys[0]);
-     prev_qtys[0] = qtys[0];
      supply_usage = ods[0]->ToMove(qtys[0]);
      if (supply_qty >= 0) {
        supply_usage = std::min(supply_qty, supply_usage);
@@ -42,7 +41,6 @@ class Chain {
 
      for (int i = 1; i < qtys.size(); i++) {
        ods[i]->UpdateUsage(prev_qtys[i], qtys[i]);
-       prev_qtys[i] = qtys[i];
        double tomove = std::min(qtys[i-1], ods[i]->ToMove(qtys[i]));
        tomoves.push_back(tomove);
      }
@@ -50,11 +48,12 @@ class Chain {
      for (int i = 0; i < qtys.size(); i++) {
        qtys[i] += tomoves[i];
      }
-     for (int i = 0; i < qtys.size()-1; i++) {
+
+     tomoves.push_back(demand_usage);
+     for (int i = 0; i < qtys.size(); i++) {
+       prev_qtys[i] = qtys[i];
        qtys[i] -= tomoves[i+1];
      }
-
-     qtys.back() -= demand_usage;
 
      return demand_usage;
    }
@@ -134,7 +133,7 @@ TEST(OndemandTests, Chain) {
   double supply = -1;
   double surplus = 2000;
   double deficit = 0;
-  for (int i = 0; i < 150; i++) {
+  for (int i = 0; i < 1000; i++) {
     double usage = ch.Step(supply + surplus, demand + deficit);
     deficit += demand - usage;
     surplus += supply - ch.supply_usage;
