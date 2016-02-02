@@ -58,5 +58,6 @@
 #include "toolkit/symbolic_function_factories.h"
 #include "toolkit/symbolic_functions.h"
 #include "toolkit/timeseries.h"
+#include "toolkit/ondemand.h"
 
 #endif  // CYCLUS_SRC_CYCLUS_H_

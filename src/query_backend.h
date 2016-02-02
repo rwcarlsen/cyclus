@@ -245,6 +245,17 @@ enum DbTypes {
   // list< pair<int, int>
   LIST_PAIR_INT_INT,
   VL_LIST_PAIR_INT_INT,
+
+  // map<string, list<double> >
+  MAP_STRING_LIST_DOUBLE,
+  MAP_STRING_VL_LIST_DOUBLE,
+  VL_MAP_STRING_LIST_DOUBLE,
+  MAP_VL_STRING_LIST_DOUBLE,
+  MAP_VL_STRING_VL_LIST_DOUBLE,
+  VL_MAP_STRING_VL_LIST_DOUBLE,
+  VL_MAP_VL_STRING_LIST_DOUBLE,
+  VL_MAP_VL_STRING_VL_LIST_DOUBLE,
+
 };
 
 /// Represents operation codes for condition checking.
