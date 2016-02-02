@@ -64,6 +64,7 @@ class Ondemand {
     
   Ondemand& use_max();
   Ondemand& use_avg();
+  // the fraction of usage rate to keep on-hand
   Ondemand& usage_buf_frac(double frac);
   Ondemand& empty_thresh(double qty);
   Ondemand& window(int width);
@@ -71,6 +72,12 @@ class Ondemand {
   // the total amount to request/move for this time step given the current
   // quantity in the buffer/inventory being managed.
   double ToMove(double curr_qty);
+
+  // the total amount to be holding in order to maintain an appropriate buffer
+  // quantity.  This is complementary to ToMove.  Use one or ther other
+  // depending on whether you are deciding how much material to move to/from the
+  // buffer or if you are deciding on how big the buffer should be.
+  double ToHold(double curr_qty);
 
   double MovingUsage();
   

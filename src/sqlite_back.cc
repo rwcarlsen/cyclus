@@ -286,6 +286,7 @@ void SqliteBack::Bind(boost::spirit::hold_any v, DbTypes type, SqlStatement::Ptr
   CYCLUS_BINDVAL(SET_STRING, std::set<std::string>);
   CYCLUS_BINDVAL(LIST_INT, std::list<int>);
   CYCLUS_BINDVAL(LIST_STRING, std::list<std::string>);
+  CYCLUS_BINDVAL(LIST_DOUBLE, std::list<double>);
   CYCLUS_BINDVAL(VECTOR_INT, std::vector<int>);
   CYCLUS_BINDVAL(VECTOR_DOUBLE, std::vector<double>);
   CYCLUS_BINDVAL(VECTOR_STRING, std::vector<std::string>);
@@ -377,6 +378,7 @@ boost::spirit::hold_any SqliteBack::ColAsVal(SqlStatement::Ptr stmt,
   CYCLUS_LOADVAL(SET_STRING, std::set<std::string>);
   CYCLUS_LOADVAL(LIST_INT, std::list<int>);
   CYCLUS_LOADVAL(LIST_STRING, std::list<std::string>);
+  CYCLUS_LOADVAL(LIST_DOUBLE, std::list<double>);
   CYCLUS_LOADVAL(VECTOR_INT, std::vector<int>);
   CYCLUS_LOADVAL(VECTOR_DOUBLE, std::vector<double>);
   CYCLUS_LOADVAL(VECTOR_STRING, std::vector<std::string>);
@@ -459,6 +461,7 @@ DbTypes SqliteBack::Type(boost::spirit::hold_any v) {
     type_map[&typeid(std::vector<std::string>)] = VECTOR_STRING;
     type_map[&typeid(std::list<int>)] = LIST_INT;
     type_map[&typeid(std::list<std::string>)] = LIST_STRING;
+    type_map[&typeid(std::list<double>)] = LIST_DOUBLE;
     type_map[&typeid(std::map<int, int>)] = MAP_INT_INT;
     type_map[&typeid(std::map<int, double>)] = MAP_INT_DOUBLE;
     type_map[&typeid(std::map<int, std::string>)] = MAP_INT_STRING;

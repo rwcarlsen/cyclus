@@ -32,7 +32,6 @@ Ondemand& Ondemand::use_avg() {
   return *this;
 };
 
-// the fraction of usage rate to keep on-hand
 Ondemand& Ondemand::usage_buf_frac(double frac) {
   usage_buf_frac_ = frac + 1;
   return *this;
@@ -48,10 +47,12 @@ Ondemand& Ondemand::window(int width) {
   return *this;
 };
 
-// the total amount to request/move for this time step given the current
-// quantity in the buffer/inventory being managed.
 double Ondemand::ToMove(double curr_qty) {
   return std::max(0.0, MovingUsage() * usage_buf_frac_ - curr_qty);
+}
+
+double Ondemand::ToHold(double curr_qty) {
+  return std::max(curr_qty, curr_qty + ToMove(curr_qty));
 }
 
 double Ondemand::MovingUsage() {
