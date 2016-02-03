@@ -64,7 +64,7 @@ class Ondemand {
     
   Ondemand& use_max();
   Ondemand& use_avg();
-  // the fraction of usage rate to keep on-hand
+  // the fraction of usage rate to keep on-hand - this should be at least 1.0.
   Ondemand& usage_buf_frac(double frac);
   Ondemand& empty_thresh(double qty);
   Ondemand& window(int width);
