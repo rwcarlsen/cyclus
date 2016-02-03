@@ -9,12 +9,14 @@ Ondemand::Ondemand()
       usage_buf_frac_(2.0),
       max_(true),
       window_(24),
+      usage_guess_(0),
       empty_thresh_(1e-6){};
 
 Ondemand::~Ondemand(){};
 
 Ondemand& Ondemand::Init(std::list<double>* qty_used, double usage_guess) {
   qty_used_ = qty_used;
+  usage_guess_ = usage_guess;
   if (qty_used_->size() < 1) {
     qty_used_->clear();
     qty_used_->push_back(usage_guess);
@@ -48,6 +50,9 @@ Ondemand& Ondemand::window(int width) {
 };
 
 double Ondemand::ToMove(double curr_qty) {
+  if (MovingUsage() * usage_buf_frac_ < usage_guess_) {
+    return usage_guess_;
+  }
   return std::max(0.0, MovingUsage() * usage_buf_frac_ - curr_qty);
 }
 

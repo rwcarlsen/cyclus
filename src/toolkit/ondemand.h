@@ -84,6 +84,7 @@ class Ondemand {
   void UpdateUsage(double pre_use_qty, double post_use_qty);
 
  private:
+  double usage_guess_;
   double empty_thresh_;
   double usage_buf_frac_;
   bool max_;
