@@ -35,6 +35,7 @@ def check_cmd(args, cwd, holdsrtn):
     if not isinstance(args, basestring):
         args = " ".join(args)
     print("TESTING: running command in {0}:\n\n{1}\n".format(cwd, args))
+    print("TESTING: actually running command in {0}\n".format(os.getcwd()))
     f = tempfile.NamedTemporaryFile()
     env = dict(os.environ)
     env['_'] = subprocess.check_output(['which', 'cyclus'], cwd=cwd).strip()
